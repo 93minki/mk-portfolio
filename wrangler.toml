@@ -1,0 +1,9 @@
+name = "my-remix-portpoilo"
+compatibility_date = "2024-06-26"
+
+pages_build_output_dir = "public"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "my_remix_portfolio_db"
+database_id = "6398b891-6354-4b55-868c-154c1cdcea5f"
