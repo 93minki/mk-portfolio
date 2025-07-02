@@ -1,11 +1,5 @@
 import { createCookieSessionStorage, redirect } from "@remix-run/cloudflare";
-
-// Cloudflare 환경 타입 정의
-interface CloudflareEnv {
-  ADMIN_PASSWORD: string;
-  SESSION_SECRET: string;
-  DB: D1Database;
-}
+import type { Env } from "../../load-context";
 
 // 세션 쿠키 설정
 export function createAuthSessionStorage(env: { SESSION_SECRET: string }) {
@@ -23,7 +17,7 @@ export function createAuthSessionStorage(env: { SESSION_SECRET: string }) {
 }
 
 // 관리자 인증 체크
-export async function requireAdmin(request: Request, env: CloudflareEnv) {
+export async function requireAdmin(request: Request, env: Env) {
   const sessionStorage = createAuthSessionStorage(env);
   const session = await sessionStorage.getSession(
     request.headers.get("Cookie")
@@ -39,11 +33,7 @@ export async function requireAdmin(request: Request, env: CloudflareEnv) {
 }
 
 // 로그인 처리
-export async function loginAdmin(
-  request: Request,
-  password: string,
-  env: CloudflareEnv
-) {
+export async function loginAdmin(request: Request, password: string, env: Env) {
   const adminPassword = env.ADMIN_PASSWORD;
 
   if (!adminPassword || password !== adminPassword) {
@@ -66,7 +56,7 @@ export async function loginAdmin(
 }
 
 // 로그아웃 처리
-export async function logoutAdmin(request: Request, env: CloudflareEnv) {
+export async function logoutAdmin(request: Request, env: Env) {
   const sessionStorage = createAuthSessionStorage(env);
   const session = await sessionStorage.getSession(
     request.headers.get("Cookie")
@@ -82,7 +72,7 @@ export async function logoutAdmin(request: Request, env: CloudflareEnv) {
 // 현재 관리자 상태 확인 (리디렉션 없이)
 export async function isAdminLoggedIn(
   request: Request,
-  env: CloudflareEnv
+  env: Env
 ): Promise<boolean> {
   try {
     const sessionStorage = createAuthSessionStorage(env);

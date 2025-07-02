@@ -6,7 +6,7 @@ import { type PlatformProxy } from "wrangler";
 // Need this empty interface so that typechecking passes
 // even if no `wrangler.toml` exists.
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface Env {
+export interface Env {
   DB: D1Database;
   ADMIN_PASSWORD: string;
   SESSION_SECRET: string;

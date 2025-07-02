@@ -1,23 +1,7 @@
 import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { useLoaderData } from "@remix-run/react";
-
-// 새 스키마에 맞는 프로젝트 타입 정의
-interface Project {
-  id: number;
-  title: string;
-  description: string;
-  long_description?: string;
-  image_url?: string;
-  tech_stack: string; // JSON 문자열
-  github_url?: string;
-  demo_url?: string;
-  category: "personal" | "client" | "work";
-  featured: boolean;
-  status: "completed" | "in_progress" | "archived";
-  order_index: number;
-  created_at: string;
-  updated_at: string;
-}
+import ProjectCard from "~/components/ui/ProjectCard";
+import type { Project } from "~/types/project";
 
 export const meta: MetaFunction = () => {
   return [
@@ -41,110 +25,145 @@ export const loader = async ({ context }: LoaderFunctionArgs) => {
 export default function Index() {
   const { projects } = useLoaderData<typeof loader>();
 
-  const parseTechtack = (techStackStr: string): string[] => {
-    try {
-      return JSON.parse(techStackStr);
-    } catch {
-      return [];
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-6xl mx-auto px-4">
-        {/* Hero Section */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+      {/* Hero Section */}
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10"></div>
+        <div className="relative max-w-7xl mx-auto px-4 py-24 md:py-32">
+          <div className="text-center">
+            <div className="inline-flex items-center px-4 py-2 rounded-full bg-blue-100 text-blue-700 text-sm font-medium mb-8">
+              <span className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
+              Available for opportunities
+            </div>
+
+            <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6 tracking-tight">
+              <span className="block">안녕하세요,</span>
+              <span className="block bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                김민기입니다
+              </span>
+            </h1>
+
+            <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
+              사용자 경험을 중시하는{" "}
+              <span className="font-semibold text-blue-600">
+                Frontend Developer
+              </span>
+              입니다.
+              <br className="hidden md:block" />
+              React와 TypeScript로 모던하고 효율적인 웹 애플리케이션을 만듭니다.
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+              <a
+                href="#projects"
+                className="inline-flex items-center px-8 py-4 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+              >
+                프로젝트 보기
+                <svg
+                  className="ml-2 w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </a>
+              <a
+                href="/admin"
+                className="inline-flex items-center px-8 py-4 rounded-xl border-2 border-gray-300 text-gray-700 font-semibold hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
+              >
+                관리자 페이지
+                <svg
+                  className="ml-2 w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                  />
+                </svg>
+              </a>
+            </div>
+
+            {/* 기술 스택 미리보기 */}
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              {[
+                "React",
+                "TypeScript",
+                "Tailwind CSS",
+                "Remix",
+                "Cloudflare",
+              ].map((tech) => (
+                <span
+                  key={tech}
+                  className="px-4 py-2 rounded-full bg-white/60 backdrop-blur-sm text-gray-700 font-medium text-sm border border-white/20 shadow-sm"
+                >
+                  {tech}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Featured Projects */}
+      <div id="projects" className="max-w-7xl mx-auto px-4 py-16 md:py-24">
         <div className="text-center mb-16">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">김민기</h1>
-          <p className="text-xl text-gray-600 mb-6">Frontend Developer</p>
-          <p className="text-gray-500 max-w-2xl mx-auto">
-            사용자 경험을 중시하는 프론트엔드 개발자입니다. React와 TypeScript를
-            주로 사용하며, 모던한 웹 기술에 관심이 많습니다.
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            Featured Projects
+          </h2>
+          <p className="text-xl text-gray-600">
+            최근 작업한 프로젝트들을 소개합니다
           </p>
         </div>
 
-        {/* Featured Projects */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-8">
-            Featured Projects
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {projects.map((project) => (
-              <div
-                key={project.id}
-                className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+        {projects.length === 0 ? (
+          <div className="text-center py-16">
+            <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
+              <svg
+                className="w-12 h-12 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
               >
-                <div className="mb-4">
-                  <span className="inline-block px-2 py-1 text-xs font-medium text-blue-600 bg-blue-100 rounded">
-                    {project.category}
-                  </span>
-                  {project.status === "in_progress" && (
-                    <span className="inline-block px-2 py-1 text-xs font-medium text-orange-600 bg-orange-100 rounded ml-2">
-                      In Progress
-                    </span>
-                  )}
-                </div>
-
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  {project.title}
-                </h3>
-
-                <p className="text-gray-600 mb-4 text-sm">
-                  {project.description}
-                </p>
-
-                {/* Tech Stack */}
-                <div className="flex flex-wrap gap-1 mb-4">
-                  {parseTechtack(project.tech_stack).map((tech, index) => (
-                    <span
-                      key={index}
-                      className="inline-block px-2 py-1 text-xs font-medium text-gray-700 bg-gray-200 rounded"
-                    >
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-
-                {/* Links */}
-                <div className="flex gap-2">
-                  {project.demo_url && (
-                    <a
-                      href={project.demo_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-                    >
-                      Live Demo →
-                    </a>
-                  )}
-                  {project.github_url && (
-                    <a
-                      href={project.github_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-gray-600 hover:text-gray-800 font-medium"
-                    >
-                      GitHub →
-                    </a>
-                  )}
-                </div>
-
-                <div className="mt-4 text-xs text-gray-400">
-                  {new Date(project.created_at).toLocaleDateString("ko-KR")}
-                </div>
-              </div>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              아직 프로젝트가 없습니다
+            </h3>
+            <p className="text-gray-600 mb-6">
+              관리자 페이지에서 첫 번째 프로젝트를 추가해보세요!
+            </p>
+            <a
+              href="/admin/projects/new"
+              className="inline-flex items-center px-6 py-3 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors"
+            >
+              프로젝트 추가하기
+            </a>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {projects.map((project) => (
+              <ProjectCard key={project.id} project={project} />
             ))}
           </div>
-        </div>
-
-        {/* Admin Link - 개발 중에만 표시 */}
-        <div className="text-center">
-          <a
-            href="/admin"
-            className="inline-block px-4 py-2 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded hover:border-gray-400 transition-colors"
-          >
-            관리자 페이지 →
-          </a>
-        </div>
+        )}
       </div>
     </div>
   );
