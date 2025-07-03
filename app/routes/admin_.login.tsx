@@ -144,7 +144,7 @@ export default function AdminLogin() {
                   개발 환경
                 </h3>
                 <div className="mt-2 text-sm text-yellow-700">
-                  <p>wrangler.toml에 ADMIN_PASSWORD 환경변수를 설정하세요.</p>
+                  <p>비밀번호: admin123</p>
                 </div>
               </div>
             </div>
