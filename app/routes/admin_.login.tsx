@@ -28,6 +28,7 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
   }
 
   try {
+    console.log("password", password);
     const result = await loginAdmin(request, password, context.cloudflare.env);
 
     if (result.error) {
@@ -43,7 +44,7 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
     if (error instanceof Response) {
       throw error;
     }
-    return { error: "로그인 중 오류가 발생했습니다." };
+    return { error: `로그인 중 오류가 발생했습니다. ${error}` };
   }
 
   return { error: "알 수 없는 오류가 발생했습니다." };

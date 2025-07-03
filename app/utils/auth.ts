@@ -45,6 +45,7 @@ export async function loginAdmin(request: Request, password: string, env: Env) {
     request.headers.get("Cookie")
   );
   session.set("isAdmin", true);
+
   const cookieHeader = await sessionStorage.commitSession(session);
 
   return {
