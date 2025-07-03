@@ -32,12 +32,15 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
     const projectId = formData.get("projectId");
     const currentFeatured = formData.get("currentFeatured") === "true";
 
-    await context.cloudflare.env.DB.prepare(
+    const result = await context.cloudflare.env.DB.prepare(
       "UPDATE projects SET featured = ? WHERE id = ?"
     )
-      .bind(!currentFeatured, projectId)
+      .bind(!currentFeatured ? 1 : 0, projectId)
       .run();
-    return redirect("/admin/projects");
+    console.log("Update result:", result);
+
+    // fetcher 사용 시 redirect 대신 null 반환하여 revalidation 유발
+    return null;
   }
 
   return null;
@@ -132,7 +135,7 @@ export default function AdminProjects() {
                     >
                       {project.status}
                     </span>
-                    {project.featured && (
+                    {Boolean(project.featured) && (
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                         Featured
                       </span>
@@ -203,23 +206,32 @@ export default function AdminProjects() {
                     <input
                       type="hidden"
                       name="currentFeatured"
-                      value={project.featured.toString()}
+                      value={Boolean(project.featured).toString()}
                     />
                     <button
                       type="submit"
-                      className={`inline-flex items-center px-3 py-1 text-xs font-medium rounded-md ${
-                        project.featured
-                          ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-200"
-                          : "bg-gray-100 text-gray-800 hover:bg-gray-200"
-                      }`}
+                      className="flex items-center gap-2 w-full"
                     >
-                      {project.featured ? "Featured 해제" : "Featured 설정"}
+                      <div
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out ${
+                          project.featured ? "bg-green-500" : "bg-gray-300"
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition duration-200 ease-in-out ${
+                            project.featured ? "translate-x-6" : "translate-x-1"
+                          }`}
+                        />
+                      </div>
+                      <span className="text-xs font-medium text-gray-700">
+                        Featured
+                      </span>
                     </button>
                   </fetcher.Form>
 
                   <Link
                     to={`/admin/projects/${project.id}/edit`}
-                    className="inline-flex items-center px-3 py-1 text-xs font-medium text-blue-700 bg-blue-100 hover:bg-blue-200 rounded-md"
+                    className="inline-flex w-full items-center justify-center px-3 py-1 text-xs font-medium text-blue-700 bg-blue-100 hover:bg-blue-200 rounded-md min-w-20"
                   >
                     편집
                   </Link>
@@ -229,7 +241,7 @@ export default function AdminProjects() {
                     <input type="hidden" name="projectId" value={project.id} />
                     <button
                       type="submit"
-                      className="inline-flex items-center px-3 py-1 text-xs font-medium text-red-700 bg-red-100 hover:bg-red-200 rounded-md"
+                      className="inline-flex w-full items-center justify-center px-3 py-1 text-xs font-medium text-red-700 bg-red-100 hover:bg-red-200 rounded-md min-w-20"
                       onClick={(e) => {
                         if (!confirm("정말로 삭제하시겠습니까?")) {
                           e.preventDefault();
