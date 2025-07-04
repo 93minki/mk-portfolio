@@ -28,7 +28,6 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
   }
 
   try {
-    console.log("password", password);
     const result = await loginAdmin(request, password, context.cloudflare.env);
 
     if (result.error) {

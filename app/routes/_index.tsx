@@ -3,6 +3,7 @@ import { useLoaderData } from "@remix-run/react";
 import ProjectCard from "~/components/ui/ProjectCard";
 import { PersonalInfo } from "~/types/personal_info";
 import type { Project } from "~/types/project";
+import { Skill } from "~/types/skill";
 
 export const meta: MetaFunction = () => {
   return [
@@ -16,15 +17,14 @@ export const meta: MetaFunction = () => {
 };
 
 export const loader = async ({ context }: LoaderFunctionArgs) => {
-  const projects = await context.cloudflare.env.DB.prepare(
-    "SELECT * FROM projects WHERE featured = 1 ORDER BY order_index ASC, created_at DESC LIMIT 6"
-  ).all();
+  const [projects, personalInfoRaw, skillsRaw] = await Promise.all([
+    context.cloudflare.env.DB.prepare(
+      "SELECT * FROM projects WHERE featured = 1 ORDER BY order_index ASC, created_at DESC LIMIT 6"
+    ).all(),
+    context.cloudflare.env.DB.prepare("SELECT * FROM personal_info").all(),
+    context.cloudflare.env.DB.prepare("SELECT * FROM skills").all(),
+  ]);
 
-  const personalInfoRaw = await context.cloudflare.env.DB.prepare(
-    "SELECT * FROM personal_info"
-  ).all();
-
-  // key-value 배열을 객체로 변형
   const personalInfo = (
     personalInfoRaw.results as unknown as PersonalInfo[]
   ).reduce((acc, item) => {
@@ -32,20 +32,39 @@ export const loader = async ({ context }: LoaderFunctionArgs) => {
     return acc;
   }, {} as Record<string, string>);
 
+  const skills = (skillsRaw.results as unknown as Skill[]).reduce(
+    (acc, item) => {
+      acc[item.category] = item.name;
+      return acc;
+    },
+    {} as Record<string, string>
+  );
+
   return {
     projects: projects.results as unknown as Project[],
     personalInfo,
+    skills,
   };
 };
 
 export default function Index() {
-  const { projects, personalInfo } = useLoaderData<typeof loader>();
+  const { projects, personalInfo, skills } = useLoaderData<typeof loader>();
 
   // 개인정보 기본값 처리
   const getName = () => personalInfo.name || "김민기";
   const getBio = () =>
     personalInfo.bio || "사용자 경험을 중시하는 Frontend Developer입니다.";
   const getLocation = () => personalInfo.location || "Seoul, South Korea";
+
+  // skills를 배열로 변환 (카테고리별로 그룹핑된 스킬들)
+  const getSkillsArray = () => {
+    const skillsArray = Object.entries(skills).map(([, name]) => name);
+    // 기본 스킬이 없으면 하드코딩된 스킬 사용
+    if (skillsArray.length === 0) {
+      return ["React", "TypeScript", "Tailwind CSS", "Remix", "Cloudflare"];
+    }
+    return skillsArray;
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
@@ -195,13 +214,7 @@ export default function Index() {
 
             {/* 기술 스택 미리보기 */}
             <div className="flex flex-wrap items-center justify-center gap-3">
-              {[
-                "React",
-                "TypeScript",
-                "Tailwind CSS",
-                "Remix",
-                "Cloudflare",
-              ].map((tech) => (
+              {getSkillsArray().map((tech) => (
                 <span
                   key={tech}
                   className="px-4 py-2 rounded-full bg-white/60 backdrop-blur-sm text-gray-700 font-medium text-sm border border-white/20 shadow-sm"
@@ -262,6 +275,68 @@ export default function Index() {
             ))}
           </div>
         )}
+      </div>
+
+      {/* Skills & Technologies */}
+      <div className="bg-white/50 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-4 py-12 md:py-16">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Skills & Technologies
+            </h2>
+            <p className="text-lg text-gray-600">
+              저와 함께 작업할 수 있는 기술 스택입니다
+            </p>
+          </div>
+
+          {Object.keys(skills).length === 0 ? (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                <svg
+                  className="w-8 h-8 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                아직 스킬이 등록되지 않았습니다
+              </h3>
+              <p className="text-gray-600 mb-4">
+                관리자 페이지에서 기술 스택을 추가해보세요!
+              </p>
+              <a
+                href="/admin"
+                className="inline-flex items-center px-4 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors"
+              >
+                관리자 페이지로 이동
+              </a>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              {Object.entries(skills).map(([category, skillName]) => (
+                <div
+                  key={category}
+                  className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100 hover:border-blue-200 text-center"
+                >
+                  <h3 className="text-sm font-medium text-gray-700 mb-1 capitalize">
+                    {category}
+                  </h3>
+                  <p className="text-blue-600 font-semibold text-sm">
+                    {skillName}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

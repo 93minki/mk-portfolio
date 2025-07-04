@@ -20,6 +20,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       current: location.pathname.startsWith("/admin/projects"),
     },
     {
+      name: "스킬관리",
+      href: "/admin/skills",
+      current: location.pathname.startsWith("/admin/skills"),
+    },
+    {
       name: "개인정보",
       href: "/admin/personalInfo",
       current: location.pathname.startsWith("/admin/personalInfo"),
