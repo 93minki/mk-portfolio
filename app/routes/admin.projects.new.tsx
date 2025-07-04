@@ -1,6 +1,16 @@
-import type { ActionFunctionArgs } from "@remix-run/cloudflare";
-import { Link, redirect, useActionData } from "@remix-run/react";
+import type {
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+} from "@remix-run/cloudflare";
+import {
+  json,
+  Link,
+  redirect,
+  useActionData,
+  useLoaderData,
+} from "@remix-run/react";
 import ProjectForm from "~/components/projects/ProjectForm";
+import { CategoryConfig, loadCategories } from "~/utils/categories";
 
 type ActionData = {
   errors?: {
@@ -12,9 +22,10 @@ type ActionData = {
   success?: boolean;
 };
 
-export const loader = () => {
+export const loader = async ({ context }: LoaderFunctionArgs) => {
   // 인증은 admin.tsx에서 자동 처리됨
-  return null;
+  const projectCategories = await loadCategories("project");
+  return json({ projectCategories });
 };
 
 export const action = async ({ request, context }: ActionFunctionArgs) => {
@@ -110,6 +121,9 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
 
 export default function NewProject() {
   const actionData = useActionData<ActionData>();
+  const { projectCategories } = useLoaderData<{
+    projectCategories: CategoryConfig[];
+  }>();
 
   return (
     <div className="p-6 max-w-3xl mx-auto">
@@ -128,7 +142,10 @@ export default function NewProject() {
         </p>
       </div>
 
-      <ProjectForm actionData={actionData || {}} />
+      <ProjectForm
+        actionData={actionData || {}}
+        categories={projectCategories}
+      />
     </div>
   );
 }

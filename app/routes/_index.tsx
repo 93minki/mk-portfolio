@@ -1,5 +1,6 @@
 import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { useLoaderData } from "@remix-run/react";
+import SkillCard from "~/components/skills/SkillCard";
 import ProjectCard from "~/components/ui/ProjectCard";
 import { PersonalInfo } from "~/types/personal_info";
 import type { Project } from "~/types/project";
@@ -32,13 +33,8 @@ export const loader = async ({ context }: LoaderFunctionArgs) => {
     return acc;
   }, {} as Record<string, string>);
 
-  const skills = (skillsRaw.results as unknown as Skill[]).reduce(
-    (acc, item) => {
-      acc[item.category] = item.name;
-      return acc;
-    },
-    {} as Record<string, string>
-  );
+  // 스킬 전체 정보를 그대로 전달
+  const skills = skillsRaw.results as unknown as Skill[];
 
   return {
     projects: projects.results as unknown as Project[],
@@ -55,16 +51,6 @@ export default function Index() {
   const getBio = () =>
     personalInfo.bio || "사용자 경험을 중시하는 Frontend Developer입니다.";
   const getLocation = () => personalInfo.location || "Seoul, South Korea";
-
-  // skills를 배열로 변환 (카테고리별로 그룹핑된 스킬들)
-  const getSkillsArray = () => {
-    const skillsArray = Object.entries(skills).map(([, name]) => name);
-    // 기본 스킬이 없으면 하드코딩된 스킬 사용
-    if (skillsArray.length === 0) {
-      return ["React", "TypeScript", "Tailwind CSS", "Remix", "Cloudflare"];
-    }
-    return skillsArray;
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
@@ -211,18 +197,6 @@ export default function Index() {
                 </svg>
               </a>
             </div>
-
-            {/* 기술 스택 미리보기 */}
-            <div className="flex flex-wrap items-center justify-center gap-3">
-              {getSkillsArray().map((tech) => (
-                <span
-                  key={tech}
-                  className="px-4 py-2 rounded-full bg-white/60 backdrop-blur-sm text-gray-700 font-medium text-sm border border-white/20 shadow-sm"
-                >
-                  {tech}
-                </span>
-              ))}
-            </div>
           </div>
         </div>
       </div>
@@ -289,7 +263,7 @@ export default function Index() {
             </p>
           </div>
 
-          {Object.keys(skills).length === 0 ? (
+          {skills.length === 0 ? (
             <div className="text-center py-12">
               <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
                 <svg
@@ -321,18 +295,8 @@ export default function Index() {
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-              {Object.entries(skills).map(([category, skillName]) => (
-                <div
-                  key={category}
-                  className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100 hover:border-blue-200 text-center"
-                >
-                  <h3 className="text-sm font-medium text-gray-700 mb-1 capitalize">
-                    {category}
-                  </h3>
-                  <p className="text-blue-600 font-semibold text-sm">
-                    {skillName}
-                  </p>
-                </div>
+              {skills.map((skill) => (
+                <SkillCard key={skill.id} skill={skill} />
               ))}
             </div>
           )}

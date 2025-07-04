@@ -1,9 +1,11 @@
 import { Form, Link } from "@remix-run/react";
 import { Project } from "~/types/project";
+import { CategoryConfig } from "~/utils/categories";
 
 interface ProjectFormProps {
   project?: Project;
   actionData: ActionData;
+  categories: CategoryConfig[];
 }
 
 type ActionData = {
@@ -16,7 +18,7 @@ type ActionData = {
   success?: boolean;
 };
 
-export default function ProjectForm({ project, actionData }: ProjectFormProps) {
+export default function ProjectForm({ project, actionData, categories }: ProjectFormProps) {
   return (
     <div className="max-w-3xl">
       <Form method="post" className="space-y-6">
@@ -122,9 +124,11 @@ export default function ProjectForm({ project, actionData }: ProjectFormProps) {
             defaultValue={project?.category}
           >
             <option value="">선택하세요</option>
-            <option value="personal">개인 프로젝트</option>
-            <option value="client">클라이언트 프로젝트</option>
-            <option value="work">회사 프로젝트</option>
+            {categories.map((category) => (
+              <option key={category.value} value={category.value}>
+                {category.label}
+              </option>
+            ))}
           </select>
           {actionData?.errors?.category && (
             <p className="mt-1 text-sm text-red-600">

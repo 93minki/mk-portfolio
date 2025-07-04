@@ -1,0 +1,44 @@
+{
+  "categories": [
+    {
+      "value": "frontend",
+      "label": "Frontend",
+      "description": "프론트엔드 개발 기술"
+    },
+    {
+      "value": "backend",
+      "label": "Backend",
+      "description": "백엔드 개발 기술"
+    },
+    {
+      "value": "database",
+      "label": "Database",
+      "description": "데이터베이스 관련 기술"
+    },
+    {
+      "value": "tools",
+      "label": "Tools",
+      "description": "개발 도구 및 유틸리티"
+    },
+    {
+      "value": "mobile",
+      "label": "Mobile",
+      "description": "모바일 앱 개발 기술"
+    },
+    {
+      "value": "cloud",
+      "label": "Cloud",
+      "description": "클라우드 서비스 및 배포"
+    },
+    {
+      "value": "design",
+      "label": "Design",
+      "description": "디자인 및 UI/UX"
+    },
+    {
+      "value": "others",
+      "label": "Others",
+      "description": "기타 기술"
+    }
+  ]
+}

@@ -5,13 +5,20 @@ import {
 } from "@remix-run/cloudflare";
 import { Form, Link, useActionData, useLoaderData } from "@remix-run/react";
 import { Skill } from "~/types/skill";
+import { loadCategories } from "~/utils/categories";
 
 export const loader = async ({ context }: LoaderFunctionArgs) => {
   const skills = await context.cloudflare.env.DB.prepare(
     "SELECT * FROM skills ORDER BY category, name"
   ).all();
 
-  return json({ skills: skills.results as unknown as Skill[] });
+  // 스킬 카테고리 설정 로드
+  const skillCategories = await loadCategories("skill");
+
+  return json({
+    skills: skills.results as unknown as Skill[],
+    skillCategories,
+  });
 };
 
 type ActionData = {
@@ -75,7 +82,7 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
 };
 
 export default function Skills() {
-  const { skills } = useLoaderData<typeof loader>();
+  const { skills, skillCategories } = useLoaderData<typeof loader>();
   const actionData = useActionData<ActionData>();
 
   // 숙련도 숫자를 문자열로 변환
@@ -268,13 +275,11 @@ export default function Skills() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">카테고리를 선택하세요</option>
-                <option value="frontend">Frontend</option>
-                <option value="backend">Backend</option>
-                <option value="database">Database</option>
-                <option value="tools">Tools</option>
-                <option value="mobile">Mobile</option>
-                <option value="cloud">Cloud</option>
-                <option value="others">Others</option>
+                {skillCategories.map((category) => (
+                  <option key={category.value} value={category.value}>
+                    {category.label}
+                  </option>
+                ))}
               </select>
             </div>
 

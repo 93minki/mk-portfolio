@@ -4,15 +4,17 @@ import { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { Link, redirect, useActionData, useLoaderData } from "@remix-run/react";
 import ProjectForm from "~/components/projects/ProjectForm";
 import { Project } from "~/types/project";
+import { loadCategories } from "~/utils/categories";
 
 export const loader = async ({ context, params }: LoaderFunctionArgs) => {
   const { id } = params;
 
-  const project = await context.cloudflare.env.DB.prepare(
-    "SELECT * FROM projects WHERE id = ?"
-  )
-    .bind(id)
-    .first();
+  const [project, projectCategories] = await Promise.all([
+    context.cloudflare.env.DB.prepare("SELECT * FROM projects WHERE id = ?")
+      .bind(id)
+      .first(),
+    loadCategories("project"),
+  ]);
 
   if (!project) {
     throw new Response("프로젝트를 찾을 수 없습니다", { status: 404 });
@@ -27,6 +29,7 @@ export const loader = async ({ context, params }: LoaderFunctionArgs) => {
       ...project,
       tech_stack: techStackString,
     } as Project & { tech_stack: string },
+    projectCategories,
   };
 };
 
@@ -148,7 +151,7 @@ export const action = async ({
 };
 
 export default function EditProject() {
-  const { project } = useLoaderData<typeof loader>();
+  const { project, projectCategories } = useLoaderData<typeof loader>();
   const actionData = useActionData<ActionData>();
 
   return (
@@ -164,7 +167,11 @@ export default function EditProject() {
         <p className="text-gray-600">프로젝트를 수정하세요</p>
       </div>
 
-      <ProjectForm project={project} actionData={actionData || {}} />
+      <ProjectForm
+        project={project}
+        actionData={actionData || {}}
+        categories={projectCategories}
+      />
     </div>
   );
 }
