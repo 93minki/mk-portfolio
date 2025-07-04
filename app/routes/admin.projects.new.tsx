@@ -2,13 +2,7 @@ import type {
   ActionFunctionArgs,
   LoaderFunctionArgs,
 } from "@remix-run/cloudflare";
-import {
-  json,
-  Link,
-  redirect,
-  useActionData,
-  useLoaderData,
-} from "@remix-run/react";
+import { Link, redirect, useActionData, useLoaderData } from "@remix-run/react";
 import ProjectForm from "~/components/projects/ProjectForm";
 import { CategoryConfig, loadCategories } from "~/utils/categories";
 
@@ -25,7 +19,7 @@ type ActionData = {
 export const loader = async ({ context }: LoaderFunctionArgs) => {
   // 인증은 admin.tsx에서 자동 처리됨
   const projectCategories = await loadCategories("project");
-  return json({ projectCategories });
+  return { projectCategories };
 };
 
 export const action = async ({ request, context }: ActionFunctionArgs) => {

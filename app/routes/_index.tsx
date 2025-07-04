@@ -1,7 +1,9 @@
 import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { useLoaderData } from "@remix-run/react";
+import ExperienceCard from "~/components/experience/ExperienceCard";
 import SkillCard from "~/components/skills/SkillCard";
 import ProjectCard from "~/components/ui/ProjectCard";
+import { Experience } from "~/types/experience";
 import { PersonalInfo } from "~/types/personal_info";
 import type { Project } from "~/types/project";
 import { Skill } from "~/types/skill";
@@ -18,13 +20,17 @@ export const meta: MetaFunction = () => {
 };
 
 export const loader = async ({ context }: LoaderFunctionArgs) => {
-  const [projects, personalInfoRaw, skillsRaw] = await Promise.all([
-    context.cloudflare.env.DB.prepare(
-      "SELECT * FROM projects WHERE featured = 1 ORDER BY order_index ASC, created_at DESC LIMIT 6"
-    ).all(),
-    context.cloudflare.env.DB.prepare("SELECT * FROM personal_info").all(),
-    context.cloudflare.env.DB.prepare("SELECT * FROM skills").all(),
-  ]);
+  const [projects, personalInfoRaw, skillsRaw, experiencesRaw] =
+    await Promise.all([
+      context.cloudflare.env.DB.prepare(
+        "SELECT * FROM projects WHERE featured = 1 ORDER BY order_index ASC, created_at DESC LIMIT 6"
+      ).all(),
+      context.cloudflare.env.DB.prepare("SELECT * FROM personal_info").all(),
+      context.cloudflare.env.DB.prepare("SELECT * FROM skills").all(),
+      context.cloudflare.env.DB.prepare(
+        "SELECT * FROM experiences ORDER BY order_index ASC, start_date DESC"
+      ).all(),
+    ]);
 
   const personalInfo = (
     personalInfoRaw.results as unknown as PersonalInfo[]
@@ -36,15 +42,20 @@ export const loader = async ({ context }: LoaderFunctionArgs) => {
   // 스킬 전체 정보를 그대로 전달
   const skills = skillsRaw.results as unknown as Skill[];
 
+  // 경력 정보 전달
+  const experiences = experiencesRaw.results as unknown as Experience[];
+
   return {
     projects: projects.results as unknown as Project[],
     personalInfo,
     skills,
+    experiences,
   };
 };
 
 export default function Index() {
-  const { projects, personalInfo, skills } = useLoaderData<typeof loader>();
+  const { projects, personalInfo, skills, experiences } =
+    useLoaderData<typeof loader>();
 
   // 개인정보 기본값 처리
   const getName = () => personalInfo.name || "김민기";
@@ -199,6 +210,56 @@ export default function Index() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Experience & Career */}
+      <div className="max-w-7xl mx-auto px-4 py-16 md:py-24">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            Experience & Career
+          </h2>
+          <p className="text-xl text-gray-600">
+            함께 성장해온 경력과 경험들입니다
+          </p>
+        </div>
+
+        {experiences.length === 0 ? (
+          <div className="text-center py-16">
+            <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
+              <svg
+                className="w-12 h-12 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2V6m8 0H8"
+                />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              아직 경력이 등록되지 않았습니다
+            </h3>
+            <p className="text-gray-600 mb-6">
+              관리자 페이지에서 경력을 추가해보세요!
+            </p>
+            <a
+              href="/admin"
+              className="inline-flex items-center px-6 py-3 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors"
+            >
+              관리자 페이지로 이동
+            </a>
+          </div>
+        ) : (
+          <div className="max-w-4xl mx-auto space-y-6">
+            {experiences.map((experience) => (
+              <ExperienceCard key={experience.id} experience={experience} />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Featured Projects */}

@@ -1,24 +1,16 @@
-import {
-  ActionFunctionArgs,
-  LoaderFunctionArgs,
-  json,
-} from "@remix-run/cloudflare";
+import { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { Form, Link, useActionData, useLoaderData } from "@remix-run/react";
-import { Skill } from "~/types/skill";
-import { loadCategories } from "~/utils/categories";
+import { Skill, SKILL_CATEGORIES } from "~/types/skill";
 
 export const loader = async ({ context }: LoaderFunctionArgs) => {
   const skills = await context.cloudflare.env.DB.prepare(
-    "SELECT * FROM skills ORDER BY category, name"
+    "SELECT * FROM skills ORDER BY category, proficiency DESC, name"
   ).all();
 
-  // 스킬 카테고리 설정 로드
-  const skillCategories = await loadCategories("skill");
-
-  return json({
+  return {
     skills: skills.results as unknown as Skill[],
-    skillCategories,
-  });
+    categories: SKILL_CATEGORIES,
+  };
 };
 
 type ActionData = {
@@ -36,35 +28,37 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
       const skillId = formData.get("skillId")?.toString();
 
       if (!skillId) {
-        return json({ error: "스킬 ID가 필요합니다." });
+        return { error: "스킬 ID가 필요합니다." };
       }
 
       await context.cloudflare.env.DB.prepare("DELETE FROM skills WHERE id = ?")
         .bind(skillId)
         .run();
 
-      return json({ success: true, action: "delete" });
+      return { success: true, action: "delete" };
     }
 
     if (intent === "add") {
       const name = formData.get("name")?.toString();
       const category = formData.get("category")?.toString();
-      const proficiencyLevel = formData.get("proficiencyLevel")?.toString();
+      const proficiency = parseInt(
+        formData.get("proficiency")?.toString() || "2"
+      );
 
       if (!name || !category) {
-        return json({ error: "스킬 이름과 카테고리는 필수입니다." });
+        return { error: "스킬 이름과 카테고리는 필수입니다." };
       }
 
-      // 숙련도 문자열을 숫자로 변환
-      const proficiencyMap: Record<string, number> = {
-        beginner: 1,
-        intermediate: 2,
-        advanced: 3,
-        expert: 4,
-      };
+      // 중복 체크
+      const existingSkill = await context.cloudflare.env.DB.prepare(
+        "SELECT id FROM skills WHERE name = ?"
+      )
+        .bind(name)
+        .first();
 
-      const proficiency =
-        proficiencyMap[proficiencyLevel || "intermediate"] || 2;
+      if (existingSkill) {
+        return { error: "이미 존재하는 스킬입니다." };
+      }
 
       await context.cloudflare.env.DB.prepare(
         "INSERT INTO skills (name, category, proficiency, created_at, updated_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)"
@@ -72,17 +66,17 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
         .bind(name, category, proficiency)
         .run();
 
-      return json({ success: true, action: "add" });
+      return { success: true, action: "add" };
     }
 
-    return json({ error: "올바르지 않은 요청입니다." });
+    return { error: "올바르지 않은 요청입니다." };
   } catch (error) {
-    return json({ error: "스킬 처리 중 오류가 발생했습니다." });
+    return { error: "스킬 처리 중 오류가 발생했습니다." };
   }
 };
 
 export default function Skills() {
-  const { skills, skillCategories } = useLoaderData<typeof loader>();
+  const { skills, categories } = useLoaderData<typeof loader>();
   const actionData = useActionData<ActionData>();
 
   // 숙련도 숫자를 문자열로 변환
@@ -275,7 +269,7 @@ export default function Skills() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">카테고리를 선택하세요</option>
-                {skillCategories.map((category) => (
+                {categories.map((category) => (
                   <option key={category.value} value={category.value}>
                     {category.label}
                   </option>
@@ -285,21 +279,21 @@ export default function Skills() {
 
             <div>
               <label
-                htmlFor="proficiencyLevel"
+                htmlFor="proficiency"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
                 숙련도
               </label>
               <select
-                id="proficiencyLevel"
-                name="proficiencyLevel"
-                defaultValue="intermediate"
+                id="proficiency"
+                name="proficiency"
+                defaultValue="2"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="beginner">초급 (Beginner)</option>
-                <option value="intermediate">중급 (Intermediate)</option>
-                <option value="advanced">고급 (Advanced)</option>
-                <option value="expert">전문가 (Expert)</option>
+                <option value="1">초급 (Beginner)</option>
+                <option value="2">중급 (Intermediate)</option>
+                <option value="3">고급 (Advanced)</option>
+                <option value="4">전문가 (Expert)</option>
               </select>
             </div>
 
