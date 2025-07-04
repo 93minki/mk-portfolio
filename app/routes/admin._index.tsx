@@ -64,7 +64,7 @@ export default function AdminIndex() {
     {
       title: "개인정보 설정",
       description: "이름, 이메일, 소셜 링크 등 설정",
-      href: "/admin/settings",
+      href: "/admin/personalInfo",
       icon: "⚙️",
       count: null,
     },

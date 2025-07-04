@@ -32,14 +32,12 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
     const projectId = formData.get("projectId");
     const currentFeatured = formData.get("currentFeatured") === "true";
 
-    const result = await context.cloudflare.env.DB.prepare(
+    await context.cloudflare.env.DB.prepare(
       "UPDATE projects SET featured = ? WHERE id = ?"
     )
       .bind(!currentFeatured ? 1 : 0, projectId)
       .run();
-    console.log("Update result:", result);
 
-    // fetcher 사용 시 redirect 대신 null 반환하여 revalidation 유발
     return null;
   }
 
