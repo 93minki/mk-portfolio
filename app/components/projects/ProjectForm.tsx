@@ -1,11 +1,10 @@
 import { Form, Link } from "@remix-run/react";
 import { Project } from "~/types/project";
-import { CategoryConfig } from "~/utils/categories";
+import { getCategories } from "~/utils/categories";
 
 interface ProjectFormProps {
   project?: Project;
   actionData: ActionData;
-  categories: CategoryConfig[];
 }
 
 type ActionData = {
@@ -18,7 +17,9 @@ type ActionData = {
   success?: boolean;
 };
 
-export default function ProjectForm({ project, actionData, categories }: ProjectFormProps) {
+export default function ProjectForm({ project, actionData }: ProjectFormProps) {
+  const categories = getCategories("project");
+
   return (
     <div className="max-w-3xl">
       <Form method="post" className="space-y-6">

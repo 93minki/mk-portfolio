@@ -2,7 +2,6 @@ import type {
   ActionFunctionArgs,
   LoaderFunctionArgs,
 } from "@remix-run/cloudflare";
-import { redirect } from "@remix-run/cloudflare";
 import { Link, useFetcher, useLoaderData } from "@remix-run/react";
 import type { Project } from "~/types/project";
 
@@ -25,7 +24,7 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
     await context.cloudflare.env.DB.prepare("DELETE FROM projects WHERE id = ?")
       .bind(projectId)
       .run();
-    return redirect("/admin/projects");
+    return null;
   }
 
   if (action === "toggle-featured") {
