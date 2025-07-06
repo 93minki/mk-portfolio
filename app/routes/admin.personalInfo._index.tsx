@@ -33,7 +33,7 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
     "bio",
     "email",
     "github",
-    "linkedin",
+    "velog",
     "location",
   ];
 
@@ -207,21 +207,21 @@ export default function PersonalInfo() {
             />
           </div>
 
-          {/* LinkedIn */}
+          {/* Velog */}
           <div>
             <label
-              htmlFor="linkedin"
+              htmlFor="velog"
               className="block text-sm font-medium text-gray-700 mb-2"
             >
-              LinkedIn URL
+              Velog URL
             </label>
             <input
               type="url"
-              id="linkedin"
-              name="linkedin"
-              defaultValue={personalInfo.linkedin || ""}
+              id="velog"
+              name="velog"
+              defaultValue={personalInfo.velog || ""}
               className="p-4 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-              placeholder="https://linkedin.com/in/username"
+              placeholder="https://velog.io/@username"
             />
           </div>
 

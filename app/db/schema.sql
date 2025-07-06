@@ -59,7 +59,7 @@ INSERT OR REPLACE INTO personal_info (key, value) VALUES
 ('email', 'example@email.com'),
 ('location', 'Seoul, South Korea'),
 ('github', 'https://github.com/93minki'),
-('linkedin', 'https://linkedin.com/in/minki-kim');
+('velog', 'https://velog.io/@93minki');
 
 -- 샘플 스킬 데이터
 INSERT OR REPLACE INTO skills (name, category, proficiency) VALUES

@@ -72,7 +72,7 @@ export default function Index() {
           <div className="text-center">
             <div className="inline-flex items-center px-4 py-2 rounded-full bg-blue-100 text-blue-700 text-sm font-medium mb-8">
               <span className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
-              Available for opportunities
+              구직중
             </div>
 
             <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6 tracking-tight">
@@ -149,119 +149,31 @@ export default function Index() {
                   GitHub
                 </a>
               )}
-              {personalInfo.linkedin && (
+              {personalInfo.velog && (
                 <a
-                  href={personalInfo.linkedin}
+                  href={personalInfo.velog}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center px-4 py-2 rounded-lg bg-white/60 backdrop-blur-sm text-gray-700 hover:text-blue-600 transition-colors"
+                  className="inline-flex items-center px-4 py-2 rounded-lg bg-white/60 backdrop-blur-sm text-gray-700 hover:text-green-600 transition-colors"
                 >
                   <svg
                     className="w-5 h-5 mr-2"
                     fill="currentColor"
                     viewBox="0 0 24 24"
                   >
-                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                    <circle cx="12" cy="12" r="11" fill="#20C997" />
+                    <path
+                      d="M10.5 6L7 18h1.5l3.5-12L15.5 18H17L13.5 6h-3z"
+                      fill="white"
+                    />
                   </svg>
-                  LinkedIn
+                  Velog
                 </a>
               )}
             </div>
-
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-              <a
-                href="#projects"
-                className="inline-flex items-center px-8 py-4 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-              >
-                프로젝트 보기
-                <svg
-                  className="ml-2 w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </a>
-              <a
-                href="/admin"
-                className="inline-flex items-center px-8 py-4 rounded-xl border-2 border-gray-300 text-gray-700 font-semibold hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
-              >
-                관리자 페이지
-                <svg
-                  className="ml-2 w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                  />
-                </svg>
-              </a>
-            </div>
           </div>
         </div>
       </div>
-
-      {/* Experience & Career */}
-      <div className="max-w-7xl mx-auto px-4 py-16 md:py-24">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Experience & Career
-          </h2>
-          <p className="text-xl text-gray-600">
-            함께 성장해온 경력과 경험들입니다
-          </p>
-        </div>
-
-        {experiences.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
-              <svg
-                className="w-12 h-12 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2V6m8 0H8"
-                />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              아직 경력이 등록되지 않았습니다
-            </h3>
-            <p className="text-gray-600 mb-6">
-              관리자 페이지에서 경력을 추가해보세요!
-            </p>
-            <a
-              href="/admin"
-              className="inline-flex items-center px-6 py-3 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors"
-            >
-              관리자 페이지로 이동
-            </a>
-          </div>
-        ) : (
-          <div className="max-w-4xl mx-auto space-y-6">
-            {experiences.map((experience) => (
-              <ExperienceCard key={experience.id} experience={experience} />
-            ))}
-          </div>
-        )}
-      </div>
-
       {/* Featured Projects */}
       <div id="projects" className="max-w-7xl mx-auto px-4 py-16 md:py-24">
         <div className="text-center mb-16">
@@ -311,7 +223,55 @@ export default function Index() {
           </div>
         )}
       </div>
+      {/* Experience & Career */}
+      <div className="max-w-7xl mx-auto px-4 py-16 md:py-24">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            Experience & Career
+          </h2>
+          <p className="text-xl text-gray-600">
+            함께 성장해온 경력과 경험들입니다
+          </p>
+        </div>
 
+        {experiences.length === 0 ? (
+          <div className="text-center py-16">
+            <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
+              <svg
+                className="w-12 h-12 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2V6m8 0H8"
+                />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              아직 경력이 등록되지 않았습니다
+            </h3>
+            <p className="text-gray-600 mb-6">
+              관리자 페이지에서 경력을 추가해보세요!
+            </p>
+            <a
+              href="/admin"
+              className="inline-flex items-center px-6 py-3 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors"
+            >
+              관리자 페이지로 이동
+            </a>
+          </div>
+        ) : (
+          <div className="max-w-4xl mx-auto space-y-6">
+            {experiences.map((experience) => (
+              <ExperienceCard key={experience.id} experience={experience} />
+            ))}
+          </div>
+        )}
+      </div>
       {/* Skills & Technologies */}
       <div className="bg-white/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 py-12 md:py-16">
