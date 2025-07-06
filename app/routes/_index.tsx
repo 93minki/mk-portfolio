@@ -7,6 +7,7 @@ import { Experience } from "~/types/experience";
 import { PersonalInfo } from "~/types/personal_info";
 import type { Project } from "~/types/project";
 import { Skill } from "~/types/skill";
+import { fetchVelogPosts } from "~/utils/rss";
 
 export const meta: MetaFunction = () => {
   return [
@@ -20,7 +21,7 @@ export const meta: MetaFunction = () => {
 };
 
 export const loader = async ({ context }: LoaderFunctionArgs) => {
-  const [projects, personalInfoRaw, skillsRaw, experiencesRaw] =
+  const [projects, personalInfoRaw, skillsRaw, experiencesRaw, velogPosts] =
     await Promise.all([
       context.cloudflare.env.DB.prepare(
         "SELECT * FROM projects WHERE featured = 1 ORDER BY order_index ASC, created_at DESC LIMIT 6"
@@ -30,6 +31,7 @@ export const loader = async ({ context }: LoaderFunctionArgs) => {
       context.cloudflare.env.DB.prepare(
         "SELECT * FROM experiences ORDER BY order_index ASC, start_date DESC"
       ).all(),
+      fetchVelogPosts("93minki", 3), // 최신 3개 게시글
     ]);
 
   const personalInfo = (
@@ -50,11 +52,12 @@ export const loader = async ({ context }: LoaderFunctionArgs) => {
     personalInfo,
     skills,
     experiences,
+    velogPosts,
   };
 };
 
 export default function Index() {
-  const { projects, personalInfo, skills, experiences } =
+  const { projects, personalInfo, skills, experiences, velogPosts } =
     useLoaderData<typeof loader>();
 
   // 개인정보 기본값 처리
@@ -322,6 +325,99 @@ export default function Index() {
             </div>
           )}
         </div>
+      </div>
+      {/* Latest Blog Posts */}
+      <div className="max-w-7xl mx-auto px-4 py-16 md:py-24">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            Latest Blog Posts
+          </h2>
+          <p className="text-xl text-gray-600">
+            벨로그에서 최근 작성한 글들입니다
+          </p>
+        </div>
+
+        {velogPosts.length === 0 ? (
+          <div className="text-center py-16">
+            <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
+              <svg
+                className="w-12 h-12 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"
+                />
+              </svg>
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              아직 블로그 글이 없습니다
+            </h3>
+            <p className="text-gray-600 mb-6">벨로그에 글을 작성해보세요!</p>
+            {personalInfo.velog && (
+              <a
+                href={personalInfo.velog}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center px-6 py-3 rounded-lg bg-green-600 text-white font-medium hover:bg-green-700 transition-colors"
+              >
+                벨로그 바로가기
+              </a>
+            )}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {velogPosts.map((post, index) => (
+              <div
+                key={index}
+                className="bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden"
+              >
+                <div className="p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3 line-clamp-2">
+                    {post.title}
+                  </h3>
+                  <p className="text-gray-600 mb-4 line-clamp-3 text-sm leading-relaxed">
+                    {post.description}
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-gray-500">
+                      {new Date(post.pubDate).toLocaleDateString("ko-KR", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
+                    </span>
+                    <a
+                      href={post.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center text-green-600 hover:text-green-800 text-sm font-medium"
+                    >
+                      읽어보기
+                      <svg
+                        className="w-4 h-4 ml-1"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                        />
+                      </svg>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
