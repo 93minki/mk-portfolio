@@ -7,7 +7,7 @@ interface ExperienceCardProps {
 export default function ExperienceCard({ experience }: ExperienceCardProps) {
   // 날짜 포맷팅 함수
   const formatDate = (dateString: string): string => {
-    const [year, month] = dateString.split('-');
+    const [year, month] = dateString.split("-");
     return `${year}.${month}`;
   };
 
@@ -24,19 +24,21 @@ export default function ExperienceCard({ experience }: ExperienceCardProps) {
   // 업무 설명을 배열로 변환 (줄바꿈 기준)
   const getDescriptions = (): string[] => {
     if (!experience.description) return [];
-    return experience.description.split('\n').filter(line => line.trim());
+    return experience.description.split("\n").filter((line) => line.trim());
   };
 
   return (
-    <div className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100">
+    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100 dark:border-gray-700">
       <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-4">
         <div className="mb-2 md:mb-0">
-          <h3 className="text-lg font-semibold text-gray-900 mb-1">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
             {experience.position}
           </h3>
-          <p className="text-blue-600 font-medium">{experience.company_name}</p>
+          <p className="text-blue-600 dark:text-blue-400 font-medium">
+            {experience.company_name}
+          </p>
         </div>
-        <div className="text-sm text-gray-500 md:text-right">
+        <div className="text-sm text-gray-500 dark:text-gray-400 md:text-right">
           <p className="font-medium">{getPeriod()}</p>
           {experience.location && (
             <p className="flex items-center mt-1 md:justify-end">
@@ -66,7 +68,7 @@ export default function ExperienceCard({ experience }: ExperienceCardProps) {
       </div>
 
       {experience.description && (
-        <div className="text-gray-600">
+        <div className="text-gray-600 dark:text-gray-300">
           <ul className="space-y-1">
             {getDescriptions().map((desc, index) => (
               <li key={index} className="text-sm leading-relaxed">
@@ -79,7 +81,7 @@ export default function ExperienceCard({ experience }: ExperienceCardProps) {
 
       {experience.is_current && (
         <div className="mt-4">
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300">
             현재 근무중
           </span>
         </div>

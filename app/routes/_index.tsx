@@ -3,6 +3,7 @@ import { useLoaderData } from "@remix-run/react";
 import ExperienceCard from "~/components/experience/ExperienceCard";
 import SkillCard from "~/components/skills/SkillCard";
 import ProjectCard from "~/components/ui/ProjectCard";
+import ThemeToggle from "~/components/ui/ThemeToggle";
 import type { Experience } from "~/types/experience";
 import type { Project } from "~/types/project";
 import type { Skill } from "~/types/skill";
@@ -106,32 +107,37 @@ export default function Index() {
   const getLocation = () => personalInfo.location || "Seoul, South Korea";
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors">
+      {/* 테마 토글 버튼 - 고정 위치 */}
+      <div className="fixed top-4 right-4 z-50">
+        <ThemeToggle />
+      </div>
+
       {/* Hero Section */}
       <div className="max-w-7xl mx-auto px-4 py-20 md:py-32">
         <div className="text-center">
           <div className="mb-8">
-            <div className="w-32 h-32 mx-auto mb-6 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center shadow-lg">
+            <div className="w-32 h-32 mx-auto mb-6 bg-gradient-to-br from-blue-400 to-purple-500 dark:from-blue-500 dark:to-purple-600 rounded-full flex items-center justify-center shadow-lg">
               <span className="text-4xl font-bold text-white">
                 {getName().charAt(0)}
               </span>
             </div>
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6">
+          <h1 className="text-5xl md:text-7xl font-bold text-gray-900 dark:text-white mb-6">
             안녕하세요,{" "}
-            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
               {getName()}
             </span>
             입니다
           </h1>
 
-          <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">
             {getBio()}
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-            <div className="flex items-center text-gray-600">
+            <div className="flex items-center text-gray-600 dark:text-gray-400">
               <svg
                 className="w-5 h-5 mr-2"
                 fill="none"
@@ -159,7 +165,7 @@ export default function Index() {
             {personalInfo.email && (
               <a
                 href={`mailto:${personalInfo.email}`}
-                className="inline-flex items-center px-6 py-3 rounded-lg bg-white text-gray-700 font-medium hover:bg-gray-50 transition-all duration-200 shadow-lg hover:shadow-xl border border-gray-200"
+                className="inline-flex items-center px-6 py-3 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 shadow-lg hover:shadow-xl border border-gray-200 dark:border-gray-700"
               >
                 <svg
                   className="w-5 h-5 mr-2"
@@ -182,7 +188,7 @@ export default function Index() {
                 href={personalInfo.github}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center px-6 py-3 rounded-lg bg-gray-900 text-white font-medium hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl"
+                className="inline-flex items-center px-6 py-3 rounded-lg bg-gray-900 dark:bg-gray-700 text-white font-medium hover:bg-gray-800 dark:hover:bg-gray-600 transition-all duration-200 shadow-lg hover:shadow-xl"
               >
                 <svg
                   className="w-5 h-5 mr-2"
@@ -199,10 +205,12 @@ export default function Index() {
                 href={personalInfo.velog}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center px-6 py-3 rounded-lg bg-green-600 text-white font-medium hover:bg-green-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                className="inline-flex items-center px-6 py-3 rounded-lg bg-green-600 dark:bg-green-700 text-white font-medium hover:bg-green-700 dark:hover:bg-green-600 transition-all duration-200 shadow-lg hover:shadow-xl"
               >
                 <div className="w-5 h-5 mr-2 bg-white rounded-full flex items-center justify-center">
-                  <span className="text-green-600 text-xs font-bold">V</span>
+                  <span className="text-green-600 dark:text-green-700 text-xs font-bold">
+                    V
+                  </span>
                 </div>
                 Velog
               </a>
@@ -214,19 +222,19 @@ export default function Index() {
       {/* Projects */}
       <div className="max-w-7xl mx-auto px-4 py-16 md:py-24">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
             Featured Projects
           </h2>
-          <p className="text-xl text-gray-600">
+          <p className="text-xl text-gray-600 dark:text-gray-300">
             개발하며 성장해온 프로젝트들입니다
           </p>
         </div>
 
         {projects.length === 0 ? (
           <div className="text-center py-16">
-            <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
+            <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
               <svg
-                className="w-12 h-12 text-gray-400"
+                className="w-12 h-12 text-gray-400 dark:text-gray-500"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -239,15 +247,15 @@ export default function Index() {
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
               아직 프로젝트가 등록되지 않았습니다
             </h3>
-            <p className="text-gray-600 mb-6">
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
               관리자 페이지에서 프로젝트를 추가해보세요!
             </p>
             <a
               href="/admin"
-              className="inline-flex items-center px-6 py-3 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center px-6 py-3 rounded-lg bg-blue-600 dark:bg-blue-700 text-white font-medium hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
             >
               관리자 페이지로 이동
             </a>
@@ -263,19 +271,19 @@ export default function Index() {
       {/* Experience & Career */}
       <div className="max-w-7xl mx-auto px-4 py-16 md:py-24">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
             Experience & Career
           </h2>
-          <p className="text-xl text-gray-600">
+          <p className="text-xl text-gray-600 dark:text-gray-300">
             함께 성장해온 경력과 경험들입니다
           </p>
         </div>
 
         {experiences.length === 0 ? (
           <div className="text-center py-16">
-            <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
+            <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
               <svg
-                className="w-12 h-12 text-gray-400"
+                className="w-12 h-12 text-gray-400 dark:text-gray-500"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -288,15 +296,15 @@ export default function Index() {
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
               아직 경력이 등록되지 않았습니다
             </h3>
-            <p className="text-gray-600 mb-6">
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
               관리자 페이지에서 경력을 추가해보세요!
             </p>
             <a
               href="/admin"
-              className="inline-flex items-center px-6 py-3 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center px-6 py-3 rounded-lg bg-blue-600 dark:bg-blue-700 text-white font-medium hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
             >
               관리자 페이지로 이동
             </a>
@@ -310,22 +318,22 @@ export default function Index() {
         )}
       </div>
       {/* Skills & Technologies */}
-      <div className="bg-white/50 backdrop-blur-sm">
+      <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm transition-colors">
         <div className="max-w-7xl mx-auto px-4 py-12 md:py-16">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
               Skills & Technologies
             </h2>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg text-gray-600 dark:text-gray-300">
               저와 함께 작업할 수 있는 기술 스택입니다
             </p>
           </div>
 
           {skills.length === 0 ? (
             <div className="text-center py-12">
-              <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+              <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
                 <svg
-                  className="w-8 h-8 text-gray-400"
+                  className="w-8 h-8 text-gray-400 dark:text-gray-500"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -338,15 +346,15 @@ export default function Index() {
                   />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                 아직 스킬이 등록되지 않았습니다
               </h3>
-              <p className="text-gray-600 mb-4">
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
                 관리자 페이지에서 기술 스택을 추가해보세요!
               </p>
               <a
                 href="/admin"
-                className="inline-flex items-center px-4 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors"
+                className="inline-flex items-center px-4 py-2 rounded-lg bg-blue-600 dark:bg-blue-700 text-white font-medium hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
               >
                 관리자 페이지로 이동
               </a>
@@ -356,9 +364,9 @@ export default function Index() {
               {sortedCategories.map((category) => (
                 <div
                   key={category}
-                  className="bg-white rounded-lg shadow-sm border border-gray-100 p-6"
+                  className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 p-6 transition-colors"
                 >
-                  <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                     {getCategoryLabel(category)}
                   </h3>
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -375,19 +383,19 @@ export default function Index() {
       {/* Latest Blog Posts */}
       <div className="max-w-7xl mx-auto px-4 py-16 md:py-24">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
             Latest Blog Posts
           </h2>
-          <p className="text-xl text-gray-600">
+          <p className="text-xl text-gray-600 dark:text-gray-300">
             벨로그에서 최근 작성한 글들입니다
           </p>
         </div>
 
         {velogPosts.length === 0 ? (
           <div className="text-center py-16">
-            <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
+            <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
               <svg
-                className="w-12 h-12 text-gray-400"
+                className="w-12 h-12 text-gray-400 dark:text-gray-500"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -400,16 +408,18 @@ export default function Index() {
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
               아직 블로그 글이 없습니다
             </h3>
-            <p className="text-gray-600 mb-6">벨로그에 글을 작성해보세요!</p>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              벨로그에 글을 작성해보세요!
+            </p>
             {personalInfo.velog && (
               <a
                 href={personalInfo.velog}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center px-6 py-3 rounded-lg bg-green-600 text-white font-medium hover:bg-green-700 transition-colors"
+                className="inline-flex items-center px-6 py-3 rounded-lg bg-green-600 dark:bg-green-700 text-white font-medium hover:bg-green-700 dark:hover:bg-green-600 transition-colors"
               >
                 벨로그 바로가기
               </a>
@@ -420,17 +430,17 @@ export default function Index() {
             {velogPosts.map((post, index) => (
               <div
                 key={index}
-                className="bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden"
+                className="bg-white dark:bg-gray-800 rounded-lg shadow-lg hover:shadow-xl dark:shadow-gray-900/20 transition-shadow duration-300 overflow-hidden border border-gray-100 dark:border-gray-700"
               >
                 <div className="p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3 line-clamp-2">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 line-clamp-2">
                     {post.title}
                   </h3>
-                  <p className="text-gray-600 mb-4 line-clamp-3 text-sm leading-relaxed">
+                  <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-3 text-sm leading-relaxed">
                     {post.description}
                   </p>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
                       {new Date(post.pubDate).toLocaleDateString("ko-KR", {
                         year: "numeric",
                         month: "long",
@@ -441,7 +451,7 @@ export default function Index() {
                       href={post.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center text-green-600 hover:text-green-800 text-sm font-medium"
+                      className="inline-flex items-center text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 text-sm font-medium"
                     >
                       읽어보기
                       <svg
