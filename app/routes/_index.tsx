@@ -3,92 +3,164 @@ import { useLoaderData } from "@remix-run/react";
 import ExperienceCard from "~/components/experience/ExperienceCard";
 import SkillCard from "~/components/skills/SkillCard";
 import ProjectCard from "~/components/ui/ProjectCard";
-import { Experience } from "~/types/experience";
-import { PersonalInfo } from "~/types/personal_info";
+import type { Experience } from "~/types/experience";
 import type { Project } from "~/types/project";
-import { Skill } from "~/types/skill";
+import type { Skill } from "~/types/skill";
+import { SKILL_CATEGORIES } from "~/types/skill";
 import { fetchVelogPosts } from "~/utils/rss";
+
+// 변환된 개인정보 타입
+type PersonalInfoData = {
+  name?: string;
+  title?: string;
+  bio?: string;
+  email?: string;
+  location?: string;
+  github?: string;
+  velog?: string;
+};
 
 export const meta: MetaFunction = () => {
   return [
     { title: "김민기 - Frontend Developer" },
     {
       name: "description",
-      content:
-        "React와 TypeScript를 주로 사용하는 프론트엔드 개발자 포트폴리오",
+      content: "React와 TypeScript를 활용한 모던 웹 개발",
     },
   ];
 };
 
 export const loader = async ({ context }: LoaderFunctionArgs) => {
-  const [projects, personalInfoRaw, skillsRaw, experiencesRaw, velogPosts] =
-    await Promise.all([
-      context.cloudflare.env.DB.prepare(
-        "SELECT * FROM projects WHERE featured = 1 ORDER BY order_index ASC, created_at DESC LIMIT 6"
-      ).all(),
-      context.cloudflare.env.DB.prepare("SELECT * FROM personal_info").all(),
-      context.cloudflare.env.DB.prepare("SELECT * FROM skills").all(),
-      context.cloudflare.env.DB.prepare(
-        "SELECT * FROM experiences ORDER BY order_index ASC, start_date DESC"
-      ).all(),
-      fetchVelogPosts("93minki", 3), // 최신 3개 게시글
-    ]);
+  const [
+    personalInfoResults,
+    projectsResults,
+    experiencesResults,
+    skillsResults,
+  ] = await Promise.all([
+    context.cloudflare.env.DB.prepare("SELECT * FROM personal_info").all(),
+    context.cloudflare.env.DB.prepare(
+      "SELECT * FROM projects WHERE featured = 1 ORDER BY order_index ASC"
+    ).all(),
+    context.cloudflare.env.DB.prepare(
+      "SELECT * FROM experiences ORDER BY order_index ASC"
+    ).all(),
+    context.cloudflare.env.DB.prepare(
+      "SELECT * FROM skills ORDER BY category, proficiency DESC, name"
+    ).all(),
+    fetchVelogPosts("93minki", 3),
+  ]);
 
-  const personalInfo = (
-    personalInfoRaw.results as unknown as PersonalInfo[]
-  ).reduce((acc, item) => {
-    acc[item.key] = item.value;
-    return acc;
-  }, {} as Record<string, string>);
+  const personalInfo: PersonalInfoData = {};
+  for (const row of personalInfoResults.results as Array<{
+    key: string;
+    value: string;
+  }>) {
+    personalInfo[row.key as keyof PersonalInfoData] = row.value;
+  }
 
-  // 스킬 전체 정보를 그대로 전달
-  const skills = skillsRaw.results as unknown as Skill[];
-
-  // 경력 정보 전달
-  const experiences = experiencesRaw.results as unknown as Experience[];
+  const velogPosts = await fetchVelogPosts("93minki", 3);
 
   return {
-    projects: projects.results as unknown as Project[],
     personalInfo,
-    skills,
-    experiences,
+    projects: projectsResults.results as unknown as Project[],
+    experiences: experiencesResults.results as unknown as Experience[],
+    skills: skillsResults.results as unknown as Skill[],
     velogPosts,
   };
 };
 
 export default function Index() {
-  const { projects, personalInfo, skills, experiences, velogPosts } =
+  const { personalInfo, projects, experiences, skills, velogPosts } =
     useLoaderData<typeof loader>();
 
-  // 개인정보 기본값 처리
+  // 카테고리별로 스킬 그룹핑
+  const skillsByCategory = skills.reduce((acc, skill) => {
+    const category = skill.category;
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(skill);
+    return acc;
+  }, {} as Record<string, Skill[]>);
+
+  // 카테고리명을 한국어로 변환
+  const getCategoryLabel = (category: string) => {
+    const categoryConfig = SKILL_CATEGORIES.find(
+      (cat) => cat.value === category
+    );
+    return categoryConfig ? categoryConfig.label : category;
+  };
+
+  // 카테고리 순서 정의
+  const categoryOrder = ["frontend", "backend", "database", "tools"];
+
+  // 순서대로 카테고리 정렬
+  const sortedCategories = categoryOrder.filter(
+    (category) => skillsByCategory[category]
+  );
+
   const getName = () => personalInfo.name || "김민기";
   const getBio = () =>
     personalInfo.bio || "사용자 경험을 중시하는 Frontend Developer입니다.";
+
   const getLocation = () => personalInfo.location || "Seoul, South Korea";
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Hero Section */}
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10"></div>
-        <div className="relative max-w-7xl mx-auto px-4 py-24 md:py-32">
-          <div className="text-center">
-            <div className="inline-flex items-center px-4 py-2 rounded-full bg-blue-100 text-blue-700 text-sm font-medium mb-8">
-              <span className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
-              구직중
-            </div>
-
-            <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6 tracking-tight">
-              <span className="block">안녕하세요,</span>
-              <span className="block bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                {getName()}입니다
+      <div className="max-w-7xl mx-auto px-4 py-20 md:py-32">
+        <div className="text-center">
+          <div className="mb-8">
+            <div className="w-32 h-32 mx-auto mb-6 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center shadow-lg">
+              <span className="text-4xl font-bold text-white">
+                {getName().charAt(0)}
               </span>
-            </h1>
+            </div>
+          </div>
 
-            <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-              {getBio()}
-              <br className="hidden md:block" />
-              <span className="inline-flex items-center mt-2 text-lg text-gray-500">
+          <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6">
+            안녕하세요,{" "}
+            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              {getName()}
+            </span>
+            입니다
+          </h1>
+
+          <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
+            {getBio()}
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+            <div className="flex items-center text-gray-600">
+              <svg
+                className="w-5 h-5 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
+              {getLocation()}
+            </div>
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-4">
+            {personalInfo.email && (
+              <a
+                href={`mailto:${personalInfo.email}`}
+                className="inline-flex items-center px-6 py-3 rounded-lg bg-white text-gray-700 font-medium hover:bg-gray-50 transition-all duration-200 shadow-lg hover:shadow-xl border border-gray-200"
+              >
                 <svg
                   className="w-5 h-5 mr-2"
                   fill="none"
@@ -99,92 +171,54 @@ export default function Index() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                   />
                 </svg>
-                {getLocation()}
-              </span>
-            </p>
-
-            {/* 소셜 링크 추가 */}
-            <div className="flex items-center justify-center gap-4 mb-8">
-              {personalInfo.email && (
-                <a
-                  href={`mailto:${personalInfo.email}`}
-                  className="inline-flex items-center px-4 py-2 rounded-lg bg-white/60 backdrop-blur-sm text-gray-700 hover:text-blue-600 transition-colors"
+                이메일 보내기
+              </a>
+            )}
+            {personalInfo.github && (
+              <a
+                href={personalInfo.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center px-6 py-3 rounded-lg bg-gray-900 text-white font-medium hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                <svg
+                  className="w-5 h-5 mr-2"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
                 >
-                  <svg
-                    className="w-5 h-5 mr-2"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 8l7.89 7.89a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                    />
-                  </svg>
-                  Contact
-                </a>
-              )}
-              {personalInfo.github && (
-                <a
-                  href={personalInfo.github}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center px-4 py-2 rounded-lg bg-white/60 backdrop-blur-sm text-gray-700 hover:text-gray-900 transition-colors"
-                >
-                  <svg
-                    className="w-5 h-5 mr-2"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-                  </svg>
-                  GitHub
-                </a>
-              )}
-              {personalInfo.velog && (
-                <a
-                  href={personalInfo.velog}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center px-4 py-2 rounded-lg bg-white/60 backdrop-blur-sm text-gray-700 hover:text-green-600 transition-colors"
-                >
-                  <svg
-                    className="w-5 h-5 mr-2"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle cx="12" cy="12" r="11" fill="#20C997" />
-                    <path
-                      d="M10.5 6L7 18h1.5l3.5-12L15.5 18H17L13.5 6h-3z"
-                      fill="white"
-                    />
-                  </svg>
-                  Velog
-                </a>
-              )}
-            </div>
+                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                </svg>
+                GitHub
+              </a>
+            )}
+            {personalInfo.velog && (
+              <a
+                href={personalInfo.velog}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center px-6 py-3 rounded-lg bg-green-600 text-white font-medium hover:bg-green-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                <div className="w-5 h-5 mr-2 bg-white rounded-full flex items-center justify-center">
+                  <span className="text-green-600 text-xs font-bold">V</span>
+                </div>
+                Velog
+              </a>
+            )}
           </div>
         </div>
       </div>
-      {/* Featured Projects */}
-      <div id="projects" className="max-w-7xl mx-auto px-4 py-16 md:py-24">
+
+      {/* Projects */}
+      <div className="max-w-7xl mx-auto px-4 py-16 md:py-24">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             Featured Projects
           </h2>
           <p className="text-xl text-gray-600">
-            최근 작업한 프로젝트들을 소개합니다
+            개발하며 성장해온 프로젝트들입니다
           </p>
         </div>
 
@@ -201,21 +235,21 @@ export default function Index() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                  d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
                 />
               </svg>
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              아직 프로젝트가 없습니다
+              아직 프로젝트가 등록되지 않았습니다
             </h3>
             <p className="text-gray-600 mb-6">
-              관리자 페이지에서 첫 번째 프로젝트를 추가해보세요!
+              관리자 페이지에서 프로젝트를 추가해보세요!
             </p>
             <a
-              href="/admin/projects/new"
+              href="/admin"
               className="inline-flex items-center px-6 py-3 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors"
             >
-              프로젝트 추가하기
+              관리자 페이지로 이동
             </a>
           </div>
         ) : (
@@ -318,9 +352,21 @@ export default function Index() {
               </a>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-              {skills.map((skill) => (
-                <SkillCard key={skill.id} skill={skill} />
+            <div className="max-w-4xl mx-auto space-y-8">
+              {sortedCategories.map((category) => (
+                <div
+                  key={category}
+                  className="bg-white rounded-lg shadow-sm border border-gray-100 p-6"
+                >
+                  <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                    {getCategoryLabel(category)}
+                  </h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {skillsByCategory[category].map((skill) => (
+                      <SkillCard key={skill.id} skill={skill} />
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           )}

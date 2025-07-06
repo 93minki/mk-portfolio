@@ -41,6 +41,7 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
     if (intent === "add") {
       const name = formData.get("name")?.toString();
       const category = formData.get("category")?.toString();
+      const iconName = formData.get("iconName")?.toString();
       const proficiency = parseInt(
         formData.get("proficiency")?.toString() || "2"
       );
@@ -61,9 +62,9 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
       }
 
       await context.cloudflare.env.DB.prepare(
-        "INSERT INTO skills (name, category, proficiency, created_at, updated_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)"
+        "INSERT INTO skills (name, category, proficiency, icon_name, created_at, updated_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)"
       )
-        .bind(name, category, proficiency)
+        .bind(name, category, proficiency, iconName || null)
         .run();
 
       return { success: true, action: "add" };
@@ -176,9 +177,26 @@ export default function Skills() {
                         >
                           <div className="flex-1">
                             <div className="flex items-center gap-3">
-                              <span className="font-medium text-gray-900">
-                                {skill.name}
-                              </span>
+                              {skill.icon_name && (
+                                <img
+                                  src={`https://cdn.simpleicons.org/${skill.icon_name}`}
+                                  alt={`${skill.name} icon`}
+                                  className="w-5 h-5"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = "none";
+                                  }}
+                                />
+                              )}
+                              <div>
+                                <span className="font-medium text-gray-900">
+                                  {skill.name}
+                                </span>
+                                {skill.icon_name && (
+                                  <span className="text-xs text-gray-500 ml-2">
+                                    ({skill.icon_name})
+                                  </span>
+                                )}
+                              </div>
                               <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                 {getProficiencyLabel(skill.proficiency)}
                               </span>
@@ -275,6 +293,25 @@ export default function Skills() {
                   </option>
                 ))}
               </select>
+            </div>
+
+            <div>
+              <label
+                htmlFor="iconName"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                아이콘 이름 (선택)
+              </label>
+              <input
+                type="text"
+                id="iconName"
+                name="iconName"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                placeholder="예: react, typescript, nextdotjs"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Simple Icons에서 사용하는 아이콘 이름 (소문자, 특수문자 제거)
+              </p>
             </div>
 
             <div>
