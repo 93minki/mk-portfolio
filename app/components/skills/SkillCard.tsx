@@ -12,10 +12,10 @@ export default function SkillCard({ skill }: SkillCardProps) {
   return (
     <div
       key={skill.id}
-      className="bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100 dark:border-gray-600 hover:border-blue-200 dark:hover:border-blue-400 text-center"
+      className="flex gap-4 items-center bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100 dark:border-gray-600 hover:border-blue-200 dark:hover:border-blue-400 text-center"
     >
       {iconUrl && (
-        <div className="mb-3">
+        <div className="">
           <img
             src={iconUrl}
             alt={`${skill.name} icon`}
@@ -27,12 +27,9 @@ export default function SkillCard({ skill }: SkillCardProps) {
           />
         </div>
       )}
-      <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-1">
+      <h3 className="text-sm font-medium text-gray-900 dark:text-white">
         {skill.name}
       </h3>
-      <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">
-        {skill.category}
-      </p>
     </div>
   );
 }

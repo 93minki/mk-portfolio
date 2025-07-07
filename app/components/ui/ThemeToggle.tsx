@@ -1,7 +1,7 @@
 import { useDarkMode } from "~/hooks/useDarkMode";
 
 export default function ThemeToggle() {
-  const { theme, isDark, mounted, toggleTheme } = useDarkMode();
+  const { isDark, mounted, toggleTheme } = useDarkMode();
 
   // 서버사이드 렌더링 중에는 아이콘을 표시하지 않음 (hydration 불일치 방지)
   if (!mounted) {
@@ -12,7 +12,7 @@ export default function ThemeToggle() {
     );
   }
 
-  // 현재 실제 다크모드 상태에 따라 아이콘 결정
+  // 현재 테마에 따라 아이콘 결정
   const getIcon = () => {
     if (isDark) {
       // 다크 모드일 때 달 아이콘
@@ -52,9 +52,9 @@ export default function ThemeToggle() {
   };
 
   const getLabel = () => {
-    if (theme === "light") return "라이트 모드 (다크 모드로 전환)";
-    if (theme === "dark") return "다크 모드 (시스템 설정으로 전환)";
-    return `시스템 설정 (${isDark ? "다크" : "라이트"} 모드 적용 중)`;
+    return isDark
+      ? "다크 모드 (라이트 모드로 전환)"
+      : "라이트 모드 (다크 모드로 전환)";
   };
 
   return (
