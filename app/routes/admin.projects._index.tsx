@@ -85,14 +85,16 @@ export default function AdminProjects() {
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
             프로젝트 관리
           </h1>
-          <p className="text-gray-600">포트폴리오 프로젝트를 관리하세요</p>
+          <p className="text-gray-600 dark:text-gray-400">
+            포트폴리오 프로젝트를 관리하세요
+          </p>
         </div>
         <Link
           to="/admin/projects/new"
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
         >
           + 새 프로젝트 추가
         </Link>
@@ -100,13 +102,15 @@ export default function AdminProjects() {
 
       {projects.length === 0 ? (
         <div className="text-center py-12">
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
             아직 프로젝트가 없습니다
           </h3>
-          <p className="text-gray-600 mb-6">첫 번째 프로젝트를 추가해보세요!</p>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            첫 번째 프로젝트를 추가해보세요!
+          </p>
           <Link
             to="/admin/projects/new"
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
           >
             + 프로젝트 추가하기
           </Link>
@@ -114,7 +118,10 @@ export default function AdminProjects() {
       ) : (
         <div className="grid grid-cols-1 gap-6">
           {projects.map((project) => (
-            <div key={project.id} className="bg-gray-50 rounded-lg p-6">
+            <div
+              key={project.id}
+              className="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-6 transition-colors"
+            >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-3">
@@ -133,20 +140,20 @@ export default function AdminProjects() {
                       {project.status}
                     </span>
                     {Boolean(project.featured) && (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-700">
                         Featured
                       </span>
                     )}
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
                       순서: {project.order_index}
                     </span>
                   </div>
 
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                     {project.title}
                   </h3>
 
-                  <p className="text-gray-600 mb-3 text-sm">
+                  <p className="text-gray-600 dark:text-gray-300 mb-3 text-sm">
                     {project.description}
                   </p>
 
@@ -155,7 +162,7 @@ export default function AdminProjects() {
                     {parseTechtack(project.tech_stack).map((tech, index) => (
                       <span
                         key={index}
-                        className="inline-block px-2 py-1 text-xs font-medium text-gray-700 bg-gray-200 rounded"
+                        className="inline-block px-2 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-600 rounded border border-gray-300 dark:border-gray-500"
                       >
                         {tech}
                       </span>
@@ -169,7 +176,7 @@ export default function AdminProjects() {
                         href={project.demo_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-800 text-sm"
+                        className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm transition-colors"
                       >
                         Live Demo →
                       </a>
@@ -179,14 +186,14 @@ export default function AdminProjects() {
                         href={project.github_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-gray-600 hover:text-gray-800 text-sm"
+                        className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-300 text-sm transition-colors"
                       >
                         GitHub →
                       </a>
                     )}
                   </div>
 
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
                     생성일:{" "}
                     {new Date(project.created_at).toLocaleDateString("ko-KR")}
                   </div>
@@ -211,7 +218,9 @@ export default function AdminProjects() {
                     >
                       <div
                         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out ${
-                          project.featured ? "bg-green-500" : "bg-gray-300"
+                          project.featured
+                            ? "bg-green-500 dark:bg-green-600"
+                            : "bg-gray-300 dark:bg-gray-600"
                         }`}
                       >
                         <span
@@ -220,7 +229,7 @@ export default function AdminProjects() {
                           }`}
                         />
                       </div>
-                      <span className="text-xs font-medium text-gray-700">
+                      <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
                         Featured
                       </span>
                     </button>
@@ -228,7 +237,7 @@ export default function AdminProjects() {
 
                   <Link
                     to={`/admin/projects/${project.id}/edit`}
-                    className="inline-flex w-full items-center justify-center px-3 py-1 text-xs font-medium text-blue-700 bg-blue-100 hover:bg-blue-200 rounded-md min-w-20"
+                    className="inline-flex w-full items-center justify-center px-3 py-1 text-xs font-medium text-blue-700 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 hover:bg-blue-200 dark:hover:bg-blue-800 rounded-md min-w-20 transition-colors"
                   >
                     편집
                   </Link>
@@ -238,7 +247,7 @@ export default function AdminProjects() {
                     <input type="hidden" name="projectId" value={project.id} />
                     <button
                       type="submit"
-                      className="inline-flex w-full items-center justify-center px-3 py-1 text-xs font-medium text-red-700 bg-red-100 hover:bg-red-200 rounded-md min-w-20"
+                      className="inline-flex w-full items-center justify-center px-3 py-1 text-xs font-medium text-red-700 dark:text-red-400 bg-red-100 dark:bg-red-900 hover:bg-red-200 dark:hover:bg-red-800 rounded-md min-w-20 transition-colors"
                       onClick={(e) => {
                         if (!confirm("정말로 삭제하시겠습니까?")) {
                           e.preventDefault();

@@ -70,10 +70,12 @@ export default function PersonalInfo() {
     <div className="p-6 max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2 dark:text-white">
             개인정보 관리
           </h1>
-          <p className="text-gray-600">포트폴리오 개인정보를 관리하세요</p>
+          <p className="text-gray-600 dark:text-gray-400">
+            포트폴리오 개인정보를 관리하세요
+          </p>
         </div>
         <Link
           to="/admin"
@@ -103,7 +105,7 @@ export default function PersonalInfo() {
           <div>
             <label
               htmlFor="name"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300"
             >
               이름 *
             </label>
@@ -121,7 +123,7 @@ export default function PersonalInfo() {
           <div>
             <label
               htmlFor="title"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300"
             >
               직책/타이틀 *
             </label>
@@ -139,7 +141,7 @@ export default function PersonalInfo() {
           <div>
             <label
               htmlFor="bio"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300"
             >
               자기소개 *
             </label>
@@ -157,7 +159,7 @@ export default function PersonalInfo() {
           <div>
             <label
               htmlFor="email"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300"
             >
               이메일
             </label>
@@ -175,7 +177,7 @@ export default function PersonalInfo() {
           <div>
             <label
               htmlFor="location"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300"
             >
               위치
             </label>
@@ -193,7 +195,7 @@ export default function PersonalInfo() {
           <div>
             <label
               htmlFor="github"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300"
             >
               GitHub URL
             </label>
@@ -211,7 +213,7 @@ export default function PersonalInfo() {
           <div>
             <label
               htmlFor="velog"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium text-gray-700 mb-2 dark:text-gray-300"
             >
               Velog URL
             </label>

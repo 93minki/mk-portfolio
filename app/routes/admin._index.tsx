@@ -73,58 +73,64 @@ export default function AdminIndex() {
   return (
     <div className="p-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
           관리자 대시보드
         </h1>
-        <p className="text-gray-600">포트폴리오 콘텐츠를 관리하세요</p>
+        <p className="text-gray-600 dark:text-gray-400">
+          포트폴리오 콘텐츠를 관리하세요
+        </p>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-gray-50 rounded-lg p-6">
+        <div className="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-6 transition-colors">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center text-white text-sm font-bold">
+              <div className="w-8 h-8 bg-blue-500 dark:bg-blue-600 rounded-lg flex items-center justify-center text-white text-sm font-bold">
                 P
               </div>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">전체 프로젝트</p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                전체 프로젝트
+              </p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">
                 {stats.totalProjects}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-gray-50 rounded-lg p-6">
+        <div className="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-6 transition-colors">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center text-white text-sm font-bold">
+              <div className="w-8 h-8 bg-green-500 dark:bg-green-600 rounded-lg flex items-center justify-center text-white text-sm font-bold">
                 F
               </div>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
                 메인 노출 프로젝트
               </p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">
                 {stats.featuredProjects}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-gray-50 rounded-lg p-6">
+        <div className="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-6 transition-colors">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center text-white text-sm font-bold">
+              <div className="w-8 h-8 bg-purple-500 dark:bg-purple-600 rounded-lg flex items-center justify-center text-white text-sm font-bold">
                 S
               </div>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">보유 기술</p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                보유 기술
+              </p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">
                 {stats.totalSkills}
               </p>
             </div>
@@ -138,21 +144,25 @@ export default function AdminIndex() {
           <Link
             key={item.href}
             to={item.href}
-            className="bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors p-6 block"
+            className="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors p-6 block"
           >
             <div className="flex items-center mb-4">
               <span className="text-2xl mr-3">{item.icon}</span>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                   {item.title}
                 </h3>
                 {item.count !== null && (
-                  <span className="text-sm text-gray-500">{item.count}개</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                    {item.count}개
+                  </span>
                 )}
               </div>
             </div>
-            <p className="text-gray-600 text-sm">{item.description}</p>
-            <div className="mt-4 text-blue-600 text-sm font-medium">
+            <p className="text-gray-600 dark:text-gray-300 text-sm">
+              {item.description}
+            </p>
+            <div className="mt-4 text-blue-600 dark:text-blue-400 text-sm font-medium">
               관리하기 →
             </div>
           </Link>

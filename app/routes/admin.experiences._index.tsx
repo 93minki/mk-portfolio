@@ -97,12 +97,16 @@ export default function Experiences() {
     <div className="p-6 max-w-6xl mx-auto">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">경력 관리</h1>
-          <p className="text-gray-600">경력과 경험을 관리하세요</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            경력 관리
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            경력과 경험을 관리하세요
+          </p>
         </div>
         <Link
           to="/admin"
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
         >
           대시보드로 이동
         </Link>
@@ -110,8 +114,8 @@ export default function Experiences() {
 
       {/* 성공/에러 메시지 */}
       {actionData?.success && (
-        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-md">
-          <p className="text-green-800">
+        <div className="mb-6 p-4 bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 rounded-md transition-colors">
+          <p className="text-green-800 dark:text-green-300">
             {actionData.action === "add"
               ? "새 경력이 성공적으로 추가되었습니다!"
               : "경력이 성공적으로 삭제되었습니다!"}
@@ -119,23 +123,23 @@ export default function Experiences() {
         </div>
       )}
       {actionData?.error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
-          <p className="text-red-800">{actionData.error}</p>
+        <div className="mb-6 p-4 bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-md transition-colors">
+          <p className="text-red-800 dark:text-red-300">{actionData.error}</p>
         </div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* 기존 경력 리스트 */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-colors">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
             현재 경력 ({experiences.length}개)
           </h2>
 
           {experiences.length === 0 ? (
             <div className="text-center py-8">
-              <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+              <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
                 <svg
-                  className="w-8 h-8 text-gray-400"
+                  className="w-8 h-8 text-gray-400 dark:text-gray-500"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -148,92 +152,93 @@ export default function Experiences() {
                   />
                 </svg>
               </div>
-              <p className="text-gray-500">등록된 경력이 없습니다.</p>
+              <p className="text-gray-500 dark:text-gray-400">
+                등록된 경력이 없습니다.
+              </p>
             </div>
           ) : (
             <div className="space-y-4">
               {experiences.map((experience) => (
                 <div
                   key={experience.id}
-                  className="flex items-start justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                  className="border border-gray-200 dark:border-gray-600 rounded-lg p-4 bg-gray-50 dark:bg-gray-700 transition-colors"
                 >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="font-medium text-gray-900">
-                        {experience.position}
-                      </h3>
-                      {experience.is_current && (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          현재 근무중
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-blue-600 font-medium text-sm mb-1">
-                      {experience.company_name}
-                    </p>
-                    <p className="text-gray-500 text-sm">
-                      {getPeriod(experience)}
-                    </p>
-                    {experience.location && (
-                      <p className="text-gray-500 text-sm">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                          {experience.position}
+                        </h3>
+                        {experience.is_current && (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300 border border-green-200 dark:border-green-700">
+                            현재 근무중
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-blue-600 dark:text-blue-400 font-medium mb-1">
+                        {experience.company_name}
+                      </p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                        {getPeriod(experience)}
+                      </p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
                         {experience.location}
                       </p>
-                    )}
-                  </div>
-                  <Form method="post" className="ml-4">
-                    <input type="hidden" name="intent" value="delete" />
-                    <input
-                      type="hidden"
-                      name="experienceId"
-                      value={experience.id}
-                    />
-                    <button
-                      type="submit"
-                      className="text-red-600 hover:text-red-800 transition-colors"
-                      onClick={(e) => {
-                        if (
-                          !confirm(
-                            `"${experience.company_name}"에서의 경력을 삭제하시겠습니까?`
-                          )
-                        ) {
-                          e.preventDefault();
-                        }
-                      }}
-                    >
-                      <svg
-                        className="w-5 h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
+                      {experience.description && (
+                        <p className="text-sm text-gray-700 dark:text-gray-300">
+                          {experience.description}
+                        </p>
+                      )}
+                    </div>
+                    <Form method="post" className="ml-4">
+                      <input type="hidden" name="_action" value="delete" />
+                      <input
+                        type="hidden"
+                        name="experienceId"
+                        value={experience.id}
+                      />
+                      <button
+                        type="submit"
+                        className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 p-1 transition-colors"
+                        onClick={(e) => {
+                          if (!confirm("정말로 삭제하시겠습니까?")) {
+                            e.preventDefault();
+                          }
+                        }}
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                        />
-                      </svg>
-                    </button>
-                  </Form>
+                        <svg
+                          className="w-4 h-4"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M8.75 1A2.75 2.75 0 006 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 10.23 1.482l.149-.022.841 10.518A2.75 2.75 0 007.596 19h4.807a2.75 2.75 0 002.742-2.53l.841-10.52.149.023a.75.75 0 00.23-1.482A41.03 41.03 0 0014 4.193V3.75A2.75 2.75 0 0011.25 1h-2.5zM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4zM8.58 7.72a.75.75 0 00-1.5.06l.3 7.5a.75.75 0 101.5-.06l-.3-7.5zm4.34.06a.75.75 0 10-1.5-.06l-.3 7.5a.75.75 0 101.5.06l.3-7.5z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </button>
+                    </Form>
+                  </div>
                 </div>
               ))}
             </div>
           )}
         </div>
 
-        {/* 새 경력 추가 폼 */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
+        {/* 새 경력 추가 */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-colors">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
             새 경력 추가
           </h2>
 
           <Form method="post" className="space-y-4">
-            <input type="hidden" name="intent" value="add" />
+            <input type="hidden" name="_action" value="add" />
 
             <div>
               <label
                 htmlFor="company_name"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
               >
                 회사명 *
               </label>
@@ -241,16 +246,16 @@ export default function Experiences() {
                 type="text"
                 id="company_name"
                 name="company_name"
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                 placeholder="예: 테크 스타트업"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                required
               />
             </div>
 
             <div>
               <label
                 htmlFor="position"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
               >
                 직책/직위 *
               </label>
@@ -258,25 +263,25 @@ export default function Experiences() {
                 type="text"
                 id="position"
                 name="position"
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                 placeholder="예: Frontend Developer"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                required
               />
             </div>
 
             <div>
               <label
                 htmlFor="description"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
               >
                 업무 설명
               </label>
               <textarea
                 id="description"
                 name="description"
-                rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                placeholder="- 주요 업무 내용을 줄바꿈으로 구분해서 작성하세요"
+                rows={3}
+                placeholder="주요 업무, 성과 등을 설명해주세요"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               />
             </div>
 
@@ -284,23 +289,22 @@ export default function Experiences() {
               <div>
                 <label
                   htmlFor="start_date"
-                  className="block text-sm font-medium text-gray-700 mb-2"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                 >
-                  시작일 *
+                  시작일
                 </label>
                 <input
                   type="month"
                   id="start_date"
                   name="start_date"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
-
               <div>
                 <label
                   htmlFor="end_date"
-                  className="block text-sm font-medium text-gray-700 mb-2"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                 >
                   종료일
                 </label>
@@ -308,8 +312,7 @@ export default function Experiences() {
                   type="month"
                   id="end_date"
                   name="end_date"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="현재 근무중이면 비워두세요"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 />
               </div>
             </div>
@@ -317,7 +320,7 @@ export default function Experiences() {
             <div>
               <label
                 htmlFor="location"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
               >
                 근무지
               </label>
@@ -325,8 +328,8 @@ export default function Experiences() {
                 type="text"
                 id="location"
                 name="location"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                 placeholder="예: Seoul, Korea"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               />
             </div>
 
@@ -335,24 +338,22 @@ export default function Experiences() {
                 id="is_current"
                 name="is_current"
                 type="checkbox"
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
               />
               <label
                 htmlFor="is_current"
-                className="ml-2 block text-sm text-gray-900"
+                className="ml-2 block text-sm text-gray-900 dark:text-gray-300"
               >
                 현재 근무중
               </label>
             </div>
 
-            <div className="pt-4">
-              <button
-                type="submit"
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                경력 추가하기
-              </button>
-            </div>
+            <button
+              type="submit"
+              className="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800 transition-colors"
+            >
+              경력 추가하기
+            </button>
           </Form>
         </div>
       </div>

@@ -7,7 +7,7 @@ import ThemeToggle from "~/components/ui/ThemeToggle";
 import type { Experience } from "~/types/experience";
 import type { Project } from "~/types/project";
 import type { Skill } from "~/types/skill";
-import { SKILL_CATEGORIES } from "~/types/skill";
+import { SKILL_CATEGORIES } from "~/utils/categories";
 import { fetchVelogPosts } from "~/utils/rss";
 
 // 변환된 개인정보 타입
