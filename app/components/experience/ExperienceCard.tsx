@@ -11,10 +11,13 @@ export default function ExperienceCard({ experience }: ExperienceCardProps) {
     return `${year}.${month}`;
   };
 
+  // is_current 값을 안전하게 boolean으로 변환
+  const isCurrentlyWorking = Boolean(experience.is_current);
+
   // 기간 계산 함수
   const getPeriod = (): string => {
     const startDate = formatDate(experience.start_date);
-    if (experience.is_current || !experience.end_date) {
+    if (isCurrentlyWorking || !experience.end_date) {
       return `${startDate} - 현재`;
     }
     const endDate = formatDate(experience.end_date);
@@ -79,7 +82,8 @@ export default function ExperienceCard({ experience }: ExperienceCardProps) {
         </div>
       )}
 
-      {experience.is_current && (
+      {/* 현재 근무중 배지 - 오직 true일 때만 표시 */}
+      {isCurrentlyWorking && (
         <div className="mt-4">
           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300">
             현재 근무중

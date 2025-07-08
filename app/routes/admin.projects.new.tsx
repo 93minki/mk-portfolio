@@ -8,6 +8,7 @@ type ActionData = {
     description?: string;
     tech_stack?: string;
     category?: string;
+    image_url?: string;
   };
   success?: boolean;
 };
@@ -62,6 +63,18 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
     }
   }
 
+  // image_url이 JSON 형태인지 확인
+  if (image_url) {
+    try {
+      const image_url_array = image_url.split("\n");
+      if (image_url_array.length === 0) {
+        errors.image_url = "이미지 URL이 필요합니다.";
+      }
+    } catch {
+      errors.image_url = "이미지 URL 형식이 올바르지 않습니다.";
+    }
+  }
+
   if (Object.keys(errors).length > 0) {
     return { errors };
   }
@@ -73,11 +86,14 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
     .filter((t) => t.length > 0);
   const techStackJson = JSON.stringify(techArray);
 
+  const imageUrlArray = image_url!.split("\n");
+  const imageUrlJson = JSON.stringify(imageUrlArray);
+
   try {
     await context.cloudflare.env.DB.prepare(
       `
       INSERT INTO projects (
-        title, description, long_description, image_url, tech_stack, 
+        title, description, long_description, image_url, tech_stack,
         github_url, demo_url, category, featured, status, order_index
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `
@@ -86,7 +102,7 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
         title,
         description,
         long_description,
-        image_url,
+        imageUrlJson,
         techStackJson,
         github_url,
         demo_url,
@@ -96,9 +112,9 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
         order_index
       )
       .run();
-
     return redirect("/admin/projects");
   } catch (error) {
+    console.log("error", error);
     return { errors: { title: "프로젝트 생성 중 오류가 발생했습니다." } };
   }
 };
@@ -111,14 +127,14 @@ export default function NewProject() {
       <div className="mb-6">
         <Link
           to="/admin/projects"
-          className="text-blue-600 hover:text-blue-800 text-sm font-medium mb-2 block"
+          className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm font-medium mb-2 block transition-colors"
         >
           ← 프로젝트 관리
         </Link>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
           새 프로젝트 추가
         </h1>
-        <p className="text-gray-600">
+        <p className="text-gray-600 dark:text-gray-400">
           포트폴리오에 새로운 프로젝트를 추가하세요
         </p>
       </div>

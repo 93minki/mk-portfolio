@@ -1,5 +1,7 @@
 import type { LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { Link, useLoaderData } from "@remix-run/react";
+import "keen-slider/keen-slider.min.css";
+import { useKeenSlider } from "keen-slider/react";
 import type { Project } from "~/types/project";
 
 export const loader = async ({ params, context }: LoaderFunctionArgs) => {
@@ -20,12 +22,30 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
 
 export default function ProjectDetail() {
   const { project } = useLoaderData<typeof loader>();
+  const [sliderRef, instanceRef] = useKeenSlider({
+    slides: {
+      perView: 1,
+      spacing: 10,
+    },
+    loop: true,
+  });
 
   const parseTechtack = (techStackStr: string): string[] => {
     try {
       return JSON.parse(techStackStr);
     } catch {
       return [];
+    }
+  };
+
+  // 이미지 URL 파싱 함수 다시 추가
+  const parseImageUrls = (imageUrlStr: string): string[] => {
+    try {
+      // JSON 배열인 경우
+      return JSON.parse(imageUrlStr);
+    } catch {
+      // 문자열인 경우 줄바꿈으로 분리
+      return imageUrlStr.split("\n").filter((url) => url.trim() !== "");
     }
   };
 
@@ -84,15 +104,42 @@ export default function ProjectDetail() {
           </div>
 
           {/* 프로젝트 이미지 */}
-          {project.image_url && (
-            <div className="mb-6">
-              <img
-                src={project.image_url}
-                alt={project.title}
-                className="w-full h-64 object-cover rounded-lg border border-gray-200 dark:border-gray-600"
-              />
-            </div>
-          )}
+          {project.image_url &&
+            parseImageUrls(project.image_url).length > 0 && (
+              <div className="mb-6">
+                <div ref={sliderRef} className="keen-slider">
+                  {parseImageUrls(project.image_url).map((image, index) => (
+                    <div key={index} className="keen-slider__slide">
+                      <img
+                        src={image.trim()}
+                        alt={`${project.title} 이미지 ${index + 1}`}
+                        className="w-full h-64 object-cover rounded-lg border border-gray-200 dark:border-gray-600"
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                {parseImageUrls(project.image_url).length > 1 && (
+                  <>
+                    {/* 네비게이션 버튼 */}
+                    <div className="flex justify-center gap-2 mt-4">
+                      <button
+                        onClick={() => instanceRef.current?.prev()}
+                        className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                      >
+                        ←
+                      </button>
+                      <button
+                        onClick={() => instanceRef.current?.next()}
+                        className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                      >
+                        →
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
 
           {/* 프로젝트 설명 */}
           <div className="mb-6">

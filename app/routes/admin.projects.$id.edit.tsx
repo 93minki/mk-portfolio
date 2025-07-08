@@ -36,6 +36,7 @@ type ActionData = {
     description?: string;
     tech_stack?: string;
     category?: string;
+    image_url?: string;
   };
   success?: boolean;
 };
@@ -95,6 +96,20 @@ export const action = async ({
     }
   }
 
+  // image_url 검증 추가 (생성과 동일하게)
+  if (image_url) {
+    try {
+      const imageUrlArray = image_url
+        .split("\n")
+        .filter((url) => url.trim() !== "");
+      if (imageUrlArray.length === 0) {
+        errors.image_url = "이미지 URL이 필요합니다.";
+      }
+    } catch {
+      errors.image_url = "이미지 URL 형식이 올바르지 않습니다.";
+    }
+  }
+
   if (Object.keys(errors).length > 0) {
     return { errors };
   }
@@ -105,6 +120,12 @@ export const action = async ({
     .map((t) => t.trim())
     .filter((t) => t.length > 0);
   const techStackJson = JSON.stringify(techArray);
+
+  // 이미지 URL도 JSON 배열로 변환 (생성과 동일하게)
+  const imageUrlArray = image_url
+    ? image_url.split("\n").filter((url) => url.trim() !== "")
+    : [];
+  const imageUrlJson = JSON.stringify(imageUrlArray);
 
   try {
     await context.cloudflare.env.DB.prepare(
@@ -129,7 +150,7 @@ export const action = async ({
         title,
         description,
         long_description,
-        image_url,
+        imageUrlJson,
         techStackJson,
         github_url,
         demo_url,
@@ -160,8 +181,12 @@ export default function EditProject() {
         >
           ← 프로젝트 관리
         </Link>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">프로젝트 수정</h1>
-        <p className="text-gray-600">프로젝트를 수정하세요</p>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+          프로젝트 수정
+        </h1>
+        <p className="text-gray-600 dark:text-gray-400">
+          프로젝트를 수정하세요
+        </p>
       </div>
 
       <ProjectForm project={project} actionData={actionData || {}} />

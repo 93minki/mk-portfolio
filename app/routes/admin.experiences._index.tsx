@@ -1,5 +1,12 @@
 import { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/cloudflare";
-import { Form, Link, useActionData, useLoaderData } from "@remix-run/react";
+import {
+  Form,
+  Link,
+  useActionData,
+  useLoaderData,
+  useNavigation,
+} from "@remix-run/react";
+import { useEffect, useRef } from "react";
 import { Experience } from "~/types/experience";
 
 export const loader = async ({ context }: LoaderFunctionArgs) => {
@@ -18,10 +25,10 @@ type ActionData = {
 
 export const action = async ({ request, context }: ActionFunctionArgs) => {
   const formData = await request.formData();
-  const intent = formData.get("intent")?.toString();
+  const action = formData.get("_action");
 
   try {
-    if (intent === "delete") {
+    if (action === "delete") {
       const experienceId = formData.get("experienceId")?.toString();
 
       if (!experienceId) {
@@ -37,7 +44,7 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
       return { success: true, action: "delete" };
     }
 
-    if (intent === "add") {
+    if (action === "add") {
       const company_name = formData.get("company_name")?.toString();
       const position = formData.get("position")?.toString();
       const description = formData.get("description")?.toString();
@@ -76,6 +83,19 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
 export default function Experiences() {
   const { experiences } = useLoaderData<typeof loader>();
   const actionData = useActionData<ActionData>();
+  const navigation = useNavigation();
+  const formRef = useRef<HTMLFormElement>(null);
+
+  // 성공 후 폼 리셋 (가장 일반적인 Remix 패턴)
+  useEffect(() => {
+    if (
+      navigation.state === "idle" &&
+      actionData?.success &&
+      actionData?.action === "add"
+    ) {
+      formRef.current?.reset();
+    }
+  }, [navigation.state, actionData]);
 
   // 날짜 포맷팅 함수
   const formatDate = (dateString: string): string => {
@@ -86,7 +106,9 @@ export default function Experiences() {
   // 기간 계산 함수
   const getPeriod = (experience: Experience): string => {
     const startDate = formatDate(experience.start_date);
-    if (experience.is_current || !experience.end_date) {
+    // is_current 값을 안전하게 boolean으로 변환
+    const isCurrentlyWorking = Boolean(experience.is_current);
+    if (isCurrentlyWorking || !experience.end_date) {
       return `${startDate} - 현재`;
     }
     const endDate = formatDate(experience.end_date);
@@ -169,7 +191,8 @@ export default function Experiences() {
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                           {experience.position}
                         </h3>
-                        {experience.is_current && (
+                        {/* 현재 근무중 배지 - 오직 true일 때만 표시 */}
+                        {Boolean(experience.is_current) && (
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300 border border-green-200 dark:border-green-700">
                             현재 근무중
                           </span>
@@ -232,7 +255,7 @@ export default function Experiences() {
             새 경력 추가
           </h2>
 
-          <Form method="post" className="space-y-4">
+          <Form method="post" className="space-y-4" ref={formRef}>
             <input type="hidden" name="_action" value="add" />
 
             <div>
