@@ -50,7 +50,7 @@ export default function ProjectCard({
       <div className="w-full h-48 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-xl mb-6 flex items-center justify-center overflow-hidden">
         {project.image_url ? (
           <img
-            src={project.image_url.split("\n")[0]}
+            src={JSON.parse(project.image_url)[0]}
             alt={project.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />

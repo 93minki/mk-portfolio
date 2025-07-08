@@ -113,7 +113,7 @@ export default function ProjectDetail() {
                       <img
                         src={image.trim()}
                         alt={`${project.title} 이미지 ${index + 1}`}
-                        className="w-full h-64 object-cover rounded-lg border border-gray-200 dark:border-gray-600"
+                        className="w-full h-80 md:h-96 lg:h-[500px] object-contain bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600"
                       />
                     </div>
                   ))}
