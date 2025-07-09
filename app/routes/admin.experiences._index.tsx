@@ -58,7 +58,7 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
       }
 
       await context.cloudflare.env.DB.prepare(
-        "INSERT INTO experiences (company_name, position, description, start_date, end_date, is_current, location, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)"
+        "INSERT INTO experiences (company_name, position, description, start_date, end_date, is_current, location) VALUES (?, ?, ?, ?, ?, ?, ?)"
       )
         .bind(
           company_name,

@@ -141,8 +141,7 @@ export const action = async ({
         category = ?, 
         featured = ?, 
         status = ?, 
-        order_index = ?,
-        updated_at = CURRENT_TIMESTAMP
+        order_index = ?
       WHERE id = ?
     `
     )

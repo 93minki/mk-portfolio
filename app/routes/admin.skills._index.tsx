@@ -22,10 +22,10 @@ type ActionData = {
 
 export const action = async ({ request, context }: ActionFunctionArgs) => {
   const formData = await request.formData();
-  const intent = formData.get("intent")?.toString();
+  const action = formData.get("_action")?.toString();
 
   try {
-    if (intent === "delete") {
+    if (action === "delete") {
       const skillId = formData.get("skillId")?.toString();
 
       if (!skillId) {
@@ -39,10 +39,10 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
       return { success: true, action: "delete" };
     }
 
-    if (intent === "add") {
+    if (action === "add") {
       const name = formData.get("name")?.toString();
       const category = formData.get("category")?.toString();
-      const iconName = formData.get("iconName")?.toString();
+      const iconName = formData.get("icon_name")?.toString();
       const proficiency = parseInt(
         formData.get("proficiency")?.toString() || "2"
       );
@@ -62,13 +62,23 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
         return { error: "이미 존재하는 스킬입니다." };
       }
 
-      await context.cloudflare.env.DB.prepare(
-        "INSERT INTO skills (name, category, proficiency, icon_name, created_at, updated_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)"
-      )
-        .bind(name, category, proficiency, iconName || null)
-        .run();
+      try {
+        await context.cloudflare.env.DB.prepare(
+          "INSERT INTO skills (name, category, proficiency, icon_name) VALUES (?, ?, ?, ?)"
+        )
+          .bind(name, category, proficiency, iconName || null)
+          .run();
 
-      return { success: true, action: "add" };
+        return { success: true, action: "add" };
+      } catch (dbError) {
+        console.error("DB Insert Error:", dbError);
+        console.error("Values:", { name, category, proficiency, iconName });
+        const errorMessage =
+          dbError instanceof Error ? dbError.message : String(dbError);
+        return {
+          error: `데이터베이스 저장 중 오류가 발생했습니다: ${errorMessage}`,
+        };
+      }
     }
 
     return { error: "올바르지 않은 요청입니다." };
@@ -278,14 +288,10 @@ export default function Skills() {
                 type="text"
                 id="name"
                 name="name"
-                placeholder="예: React, TypeScript, Node.js"
+                placeholder="예: React, TypeScript, Next.js, Alpine.js"
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 required
               />
-              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                Simple Icons에서 사용하는 이름에 맞춰 입력 (소문자, 특수문자
-                제거)
-              </p>
             </div>
 
             <div>
@@ -321,11 +327,20 @@ export default function Skills() {
                 type="text"
                 id="icon_name"
                 name="icon_name"
-                placeholder="예: react, typescript, nextdotjs"
+                placeholder="예: react, typescript, nextdotjs, alpinejs"
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               />
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                Simple Icons에서 사용하는 이름 (소문자, 특수문자 제거)
+                <a
+                  href="https://simpleicons.org/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
+                >
+                  Simple Icons
+                </a>
+                에서 검색 후 기술명을 그대로 입력하세요 (예: react, next.js,
+                vue.js)
               </p>
             </div>
 
