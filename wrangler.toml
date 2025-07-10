@@ -4,6 +4,10 @@ compatibility_flags = ["nodejs_compat"]
 
 pages_build_output_dir = "build/client"
 
+[vars]
+OWNER_NAME = "사용자이름"
+OWNER_POSITION = "개발포지션"
+
 [[d1_databases]]
 binding = "DB"
 database_name = "my_remix_portfolio_db"

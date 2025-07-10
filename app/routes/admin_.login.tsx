@@ -1,12 +1,24 @@
 import type {
   ActionFunctionArgs,
   LoaderFunctionArgs,
+  MetaFunction,
 } from "@remix-run/cloudflare";
 import { Form, redirect, useActionData } from "@remix-run/react";
 import { isAdminLoggedIn, loginAdmin } from "~/utils/auth";
 
 type ActionData = {
   error?: string;
+};
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "관리자 로그인" },
+    {
+      name: "description",
+      content: "포트폴리오 관리 페이지 접근을 위한 관리자 로그인",
+    },
+    { name: "robots", content: "noindex, nofollow" },
+  ];
 };
 
 export const loader = async ({ request, context }: LoaderFunctionArgs) => {

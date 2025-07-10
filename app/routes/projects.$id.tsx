@@ -1,4 +1,4 @@
-import type { LoaderFunctionArgs } from "@remix-run/cloudflare";
+import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { Link, useLoaderData } from "@remix-run/react";
 import "keen-slider/keen-slider.min.css";
 import { useKeenSlider } from "keen-slider/react";
@@ -17,7 +17,46 @@ export const loader = async ({ params, context }: LoaderFunctionArgs) => {
     throw new Response("프로젝트를 찾을 수 없습니다", { status: 404 });
   }
 
-  return { project: project as unknown as Project };
+  // 환경변수에서 소유자 정보 가져오기
+  const ownerName = context.cloudflare.env.OWNER_NAME || "Portfolio Owner";
+  const ownerPosition = context.cloudflare.env.OWNER_POSITION || "Developer";
+
+  return {
+    project: project as unknown as Project,
+    ownerName,
+    ownerPosition,
+  };
+};
+
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  if (!data) {
+    return [
+      { title: "프로젝트를 찾을 수 없습니다" },
+      { name: "description", content: "요청하신 프로젝트를 찾을 수 없습니다." },
+      { name: "robots", content: "noindex" },
+    ];
+  }
+
+  const { project, ownerName } = data;
+  const projectTitle = `${project.title} - ${ownerName} 포트폴리오`;
+  const projectDescription =
+    project.description || `${ownerName}의 프로젝트 상세 정보`;
+
+  return [
+    { title: projectTitle },
+    { name: "description", content: projectDescription },
+    {
+      name: "keywords",
+      content: `${project.title}, 프로젝트, 포트폴리오, ${ownerName}, ${project.tech_stack}`,
+    },
+    { name: "author", content: ownerName },
+    { name: "robots", content: "index, follow" },
+
+    { property: "og:title", content: projectTitle },
+    { property: "og:description", content: projectDescription },
+    { property: "og:type", content: "article" },
+    { property: "og:site_name", content: `${ownerName} Portfolio` },
+  ];
 };
 
 export default function ProjectDetail() {

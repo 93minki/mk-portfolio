@@ -21,13 +21,25 @@ type PersonalInfoData = {
   velog?: string;
 };
 
-export const meta: MetaFunction = () => {
+export const meta: MetaFunction<typeof loader> = ({ data }) => {
+  const ownerName = data?.personalInfo?.name || "Portfolio Owner";
+  const ownerTitle = data?.personalInfo?.title || "Developer";
+  const ownerBio = data?.personalInfo?.bio || "모던 웹 개발";
+
   return [
-    { title: "김민기 - Frontend Developer" },
+    { title: `${ownerName} - ${ownerTitle}` },
+    { name: "description", content: ownerBio },
     {
-      name: "description",
-      content: "React와 TypeScript를 활용한 모던 웹 개발",
+      name: "keywords",
+      content: `${ownerName}, ${ownerTitle}, 포트폴리오, 개발자`,
     },
+    { name: "author", content: ownerName },
+    { name: "robots", content: "index, follow" },
+
+    { property: "og:title", content: `${ownerName} - ${ownerTitle}` },
+    { property: "og:description", content: ownerBio },
+    { property: "og:type", content: "website" },
+    { property: "og:site_name", content: `${ownerName} Portfolio` },
   ];
 };
 

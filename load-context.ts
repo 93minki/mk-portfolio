@@ -10,6 +10,8 @@ export interface Env {
   DB: D1Database;
   ADMIN_PASSWORD: string;
   SESSION_SECRET: string;
+  OWNER_NAME: string;
+  OWNER_POSITION: string;
 }
 
 type Cloudflare = Omit<PlatformProxy<Env>, "dispose">;

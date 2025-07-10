@@ -1,10 +1,22 @@
 import type {
   ActionFunctionArgs,
   LoaderFunctionArgs,
+  MetaFunction,
 } from "@remix-run/cloudflare";
 import { redirect } from "@remix-run/cloudflare";
 import { Link, useLoaderData } from "@remix-run/react";
 import { logoutAdmin } from "~/utils/auth";
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "관리자 대시보드" },
+    {
+      name: "description",
+      content: "포트폴리오 콘텐츠 관리 대시보드",
+    },
+    { name: "robots", content: "noindex, nofollow" },
+  ];
+};
 
 export const loader = async ({ context }: LoaderFunctionArgs) => {
   // 인증은 admin.tsx에서 자동 처리됨
