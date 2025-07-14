@@ -9,92 +9,155 @@ interface CloudflareEnv {
   CF_SITE_TAG: string;
 }
 
-interface AnalyticsResponse {
-  success: boolean;
-  result: {
-    data: Array<{
-      sum: {
-        visits: number;
-      };
-    }>;
+interface GraphQLResponse {
+  data?: {
+    viewer?: {
+      zones?: Array<{
+        httpRequestsAdaptiveGroups?: Array<{
+          sum?: {
+            requests?: number;
+            visits?: number;
+          };
+          dimensions?: {
+            date?: string;
+          };
+        }>;
+      }>;
+    };
   };
+  errors?: Array<{
+    message: string;
+  }>;
 }
 
 export async function getSimpleAnalytics(
   env: CloudflareEnv
 ): Promise<SimpleAnalyticsData | null> {
-  // 환경변수 체크 및 로깅
-  console.log("Analytics function called - all env vars are present!");
-  console.log("Environment variables:", {
-    hasApiToken: !!env.CF_API_TOKEN,
-    hasAccountId: !!env.CF_ACCOUNT_ID,
-    hasSiteTag: !!env.CF_SITE_TAG,
-  });
+  console.log("🔄 Switching to GraphQL API for Web Analytics!");
 
-  // 환경변수가 없으면 일찍 반환
-  if (!env.CF_API_TOKEN || !env.CF_ACCOUNT_ID || !env.CF_SITE_TAG) {
-    console.log("Missing required environment variables for analytics");
+  // API 토큰과 Site Tag 확인 (Zone ID가 필요할 수도 있음)
+  if (!env.CF_API_TOKEN || !env.CF_SITE_TAG) {
+    console.log("Missing CF_API_TOKEN or CF_SITE_TAG");
     return null;
   }
 
   try {
-    console.log("🚀 Starting API calls...");
-    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    const thirtyDaysAgoStr = thirtyDaysAgo.toISOString().split("T")[0];
+    // 날짜 계산 (ISO 8601 형식)
+    const now = new Date();
+    const today = now.toISOString();
+    const yesterday = new Date(
+      now.getTime() - 24 * 60 * 60 * 1000
+    ).toISOString();
+    const oneWeekAgo = new Date(
+      now.getTime() - 7 * 24 * 60 * 60 * 1000
+    ).toISOString();
+
+    console.log("📅 Date range:", { yesterday, today, oneWeekAgo });
+
+    // GraphQL 쿼리 - Web Analytics용
+    const query = `
+      query GetWebAnalytics($zoneTag: String!, $since: String!, $until: String!) {
+        viewer {
+          zones(filter: {zoneTag: $zoneTag}) {
+            httpRequestsAdaptiveGroups(
+              limit: 1000,
+              filter: {
+                datetime_geq: $since,
+                datetime_lt: $until
+              }
+            ) {
+              sum {
+                requests
+                visits
+              }
+              dimensions {
+                date
+              }
+            }
+          }
+        }
+      }
+    `;
 
     const headers = {
       Authorization: `Bearer ${env.CF_API_TOKEN}`,
       "Content-Type": "application/json",
     };
 
-    console.log("📅 Date range:", { today, thirtyDaysAgoStr });
-    console.log("🔗 About to call APIs...");
+    console.log("🔗 Calling GraphQL API for Web Analytics...");
 
-    // 2개 API 호출
+    // 두 개의 쿼리: 오늘 데이터와 전체 데이터
     const [todayResponse, totalResponse] = await Promise.all([
-      // 오늘 방문자 수
-      fetch(
-        `https://api.cloudflare.com/client/v4/accounts/${env.CF_ACCOUNT_ID}/rum/site_info/${env.CF_SITE_TAG}/timeseries_analytics?metrics=visits&since=${today}&until=${today}`,
-        { headers }
-      ),
+      // 오늘 데이터
+      fetch("https://api.cloudflare.com/client/v4/graphql", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          query,
+          variables: {
+            zoneTag: env.CF_SITE_TAG,
+            since: yesterday,
+            until: today,
+          },
+        }),
+      }),
 
-      // 총 방문자 수 (최근 30일)
-      fetch(
-        `https://api.cloudflare.com/client/v4/accounts/${env.CF_ACCOUNT_ID}/rum/site_info/${env.CF_SITE_TAG}/timeseries_analytics?metrics=visits&since=${thirtyDaysAgoStr}&until=${today}`,
-        { headers }
-      ),
+      // 최근 7일 데이터
+      fetch("https://api.cloudflare.com/client/v4/graphql", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          query,
+          variables: {
+            zoneTag: env.CF_SITE_TAG,
+            since: oneWeekAgo,
+            until: today,
+          },
+        }),
+      }),
     ]);
 
-    console.log("✅ API calls completed, parsing JSON...");
+    console.log("✅ GraphQL calls completed");
 
     const [todayData, totalData] = await Promise.all([
-      todayResponse.json() as Promise<AnalyticsResponse>,
-      totalResponse.json() as Promise<AnalyticsResponse>,
+      todayResponse.json() as Promise<GraphQLResponse>,
+      totalResponse.json() as Promise<GraphQLResponse>,
     ]);
 
-    console.log("📊 API Responses:", {
-      todaySuccess: todayData.success,
-      totalSuccess: totalData.success,
-      todayDataLength: todayData.result?.data?.length || 0,
-      totalDataLength: totalData.result?.data?.length || 0,
-    });
+    console.log("📊 Today Response:", JSON.stringify(todayData, null, 2));
+    console.log("📊 Total Response:", JSON.stringify(totalData, null, 2));
 
-    if (!todayData.success || !totalData.success) {
-      console.error("Analytics API Error:", { todayData, totalData });
+    // 에러 체크
+    if (todayData.errors || totalData.errors) {
+      console.error("GraphQL Errors:", {
+        today: todayData.errors,
+        total: totalData.errors,
+      });
       return null;
     }
 
     // 데이터 추출
-    const todayVisits = todayData.result?.data?.[0]?.sum?.visits || 0;
-    const totalVisits =
-      totalData.result?.data?.reduce(
-        (sum: number, item: { sum: { visits: number } }) => {
-          return sum + (item.sum?.visits || 0);
-        },
-        0
-      ) || 0;
+    const todayZones = todayData.data?.viewer?.zones || [];
+    const totalZones = totalData.data?.viewer?.zones || [];
+
+    if (todayZones.length === 0 || totalZones.length === 0) {
+      console.log(
+        "❌ No zones found - Site Tag might be incorrect or need Zone ID"
+      );
+      return null;
+    }
+
+    // 오늘 방문자 수
+    const todayRequests = todayZones[0]?.httpRequestsAdaptiveGroups || [];
+    const todayVisits = todayRequests.reduce((sum: number, item) => {
+      return sum + (item.sum?.visits || item.sum?.requests || 0);
+    }, 0);
+
+    // 총 방문자 수 (최근 7일)
+    const totalRequests = totalZones[0]?.httpRequestsAdaptiveGroups || [];
+    const totalVisits = totalRequests.reduce((sum: number, item) => {
+      return sum + (item.sum?.visits || item.sum?.requests || 0);
+    }, 0);
 
     console.log("🎯 Final result:", { todayVisits, totalVisits });
 
@@ -103,7 +166,7 @@ export async function getSimpleAnalytics(
       totalVisits,
     };
   } catch (error) {
-    console.error("💥 Analytics Error:", error);
+    console.error("💥 GraphQL Analytics Error:", error);
     return null;
   }
 }
