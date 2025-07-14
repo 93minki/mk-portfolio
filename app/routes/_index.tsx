@@ -104,6 +104,9 @@ export default function Index() {
     analyticsData,
   } = useLoaderData<typeof loader>();
 
+  // 클라이언트에서 analytics 데이터 확인
+  console.log("Client side - Analytics data:", analyticsData);
+
   // 카테고리별로 스킬 그룹핑
   const skillsByCategory = skills.reduce((acc, skill) => {
     const category = skill.category;
