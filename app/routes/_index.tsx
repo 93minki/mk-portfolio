@@ -7,7 +7,6 @@ import ThemeToggle from "~/components/ui/ThemeToggle";
 import type { Experience } from "~/types/experience";
 import type { Project } from "~/types/project";
 import type { Skill } from "~/types/skill";
-import { getSimpleAnalytics } from "~/utils/analytics";
 import { SKILL_CATEGORIES } from "~/utils/categories";
 import { fetchVelogPosts } from "~/utils/rss";
 
@@ -65,16 +64,6 @@ export const loader = async ({ context }: LoaderFunctionArgs) => {
     fetchVelogPosts("93minki", 3),
   ]);
 
-  // Analytics는 별도로 처리하여 에러가 발생해도 페이지 로딩에 영향 안 주도록
-  let analyticsData = null;
-  let analyticsError = null;
-  try {
-    analyticsData = await getSimpleAnalytics(context.cloudflare.env);
-  } catch (error) {
-    analyticsError = error instanceof Error ? error.message : String(error);
-    console.error("Analytics error:", analyticsError);
-  }
-
   const personalInfo: PersonalInfoData = {};
   for (const row of personalInfoResults.results as Array<{
     key: string;
@@ -97,38 +86,12 @@ export const loader = async ({ context }: LoaderFunctionArgs) => {
     velogPosts,
     ownerName,
     ownerPosition,
-    analyticsData,
-    analyticsError,
-    // 디버깅용 환경변수 정보
-    envDebug: {
-      hasApiToken: !!context.cloudflare.env.CF_API_TOKEN,
-      hasAccountId: !!context.cloudflare.env.CF_ACCOUNT_ID,
-      hasSiteTag: !!context.cloudflare.env.CF_SITE_TAG,
-      apiTokenStart:
-        context.cloudflare.env.CF_API_TOKEN?.substring(0, 10) || "none",
-      accountId: context.cloudflare.env.CF_ACCOUNT_ID || "none",
-      siteTag: context.cloudflare.env.CF_SITE_TAG || "none",
-    },
   };
 };
 
 export default function Index() {
-  const {
-    personalInfo,
-    projects,
-    experiences,
-    skills,
-    velogPosts,
-    ownerName,
-    analyticsData,
-    analyticsError,
-    envDebug,
-  } = useLoaderData<typeof loader>();
-
-  // 클라이언트에서 analytics 데이터 확인
-  console.log("Client side - Analytics data:", analyticsData);
-  console.log("Client side - Analytics error:", analyticsError);
-  console.log("Client side - Environment debug:", envDebug);
+  const { personalInfo, projects, experiences, skills, velogPosts, ownerName } =
+    useLoaderData<typeof loader>();
 
   // 카테고리별로 스킬 그룹핑
   const skillsByCategory = skills.reduce((acc, skill) => {
@@ -216,28 +179,6 @@ export default function Index() {
               {getLocation()}
             </div>
           </div>
-
-          {/* 방문자 통계 - Seoul, Korea 아래에 추가 */}
-          {analyticsData && (
-            <div className="flex justify-center items-center gap-6 mb-12">
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 px-4 py-2">
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  오늘 방문
-                </div>
-                <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                  {analyticsData.todayVisits}
-                </div>
-              </div>
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 px-4 py-2">
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  총 방문
-                </div>
-                <div className="text-lg font-bold text-green-600 dark:text-green-400">
-                  {analyticsData.totalVisits}
-                </div>
-              </div>
-            </div>
-          )}
 
           <div className="flex flex-wrap justify-center gap-4">
             {personalInfo.email && (

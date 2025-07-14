@@ -12,8 +12,6 @@ export interface Env {
   SESSION_SECRET: string;
   OWNER_NAME: string;
   OWNER_POSITION: string;
-  CF_API_TOKEN: string;
-  CF_ACCOUNT_ID: string;
   CF_SITE_TAG: string;
 }
 
