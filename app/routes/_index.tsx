@@ -7,6 +7,7 @@ import ThemeToggle from "~/components/ui/ThemeToggle";
 import type { Experience } from "~/types/experience";
 import type { Project } from "~/types/project";
 import type { Skill } from "~/types/skill";
+import { getSimpleAnalytics } from "~/utils/analytics";
 import { SKILL_CATEGORIES } from "~/utils/categories";
 import { fetchVelogPosts } from "~/utils/rss";
 
@@ -49,6 +50,8 @@ export const loader = async ({ context }: LoaderFunctionArgs) => {
     projectsResults,
     experiencesResults,
     skillsResults,
+    velogPosts,
+    analyticsData,
   ] = await Promise.all([
     context.cloudflare.env.DB.prepare("SELECT * FROM personal_info").all(),
     context.cloudflare.env.DB.prepare(
@@ -61,6 +64,7 @@ export const loader = async ({ context }: LoaderFunctionArgs) => {
       "SELECT * FROM skills ORDER BY category, proficiency DESC, name"
     ).all(),
     fetchVelogPosts("93minki", 3),
+    getSimpleAnalytics(context.cloudflare.env),
   ]);
 
   const personalInfo: PersonalInfoData = {};
@@ -71,7 +75,11 @@ export const loader = async ({ context }: LoaderFunctionArgs) => {
     personalInfo[row.key as keyof PersonalInfoData] = row.value;
   }
 
-  const velogPosts = await fetchVelogPosts("93minki", 3);
+  // 환경변수 우선 적용
+  const ownerName =
+    context.cloudflare.env.OWNER_NAME || personalInfo.name || "Portfolio Owner";
+  const ownerPosition =
+    context.cloudflare.env.OWNER_POSITION || personalInfo.title || "Developer";
 
   return {
     personalInfo,
@@ -79,12 +87,22 @@ export const loader = async ({ context }: LoaderFunctionArgs) => {
     experiences: experiencesResults.results as unknown as Experience[],
     skills: skillsResults.results as unknown as Skill[],
     velogPosts,
+    ownerName,
+    ownerPosition,
+    analyticsData,
   };
 };
 
 export default function Index() {
-  const { personalInfo, projects, experiences, skills, velogPosts } =
-    useLoaderData<typeof loader>();
+  const {
+    personalInfo,
+    projects,
+    experiences,
+    skills,
+    velogPosts,
+    ownerName,
+    analyticsData,
+  } = useLoaderData<typeof loader>();
 
   // 카테고리별로 스킬 그룹핑
   const skillsByCategory = skills.reduce((acc, skill) => {
@@ -112,7 +130,7 @@ export default function Index() {
     (category) => skillsByCategory[category]
   );
 
-  const getName = () => personalInfo.name || "김민기";
+  const getName = () => ownerName || personalInfo.name || "Portfolio Owner";
   const getBio = () =>
     personalInfo.bio || "사용자 경험을 중시하는 Frontend Developer입니다.";
 
@@ -172,6 +190,28 @@ export default function Index() {
               {getLocation()}
             </div>
           </div>
+
+          {/* 방문자 통계 - Seoul, Korea 아래에 추가 */}
+          {analyticsData && (
+            <div className="flex justify-center items-center gap-6 mb-12">
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 px-4 py-2">
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  오늘 방문
+                </div>
+                <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                  {analyticsData.todayVisits}
+                </div>
+              </div>
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 px-4 py-2">
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  총 방문
+                </div>
+                <div className="text-lg font-bold text-green-600 dark:text-green-400">
+                  {analyticsData.totalVisits}
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="flex flex-wrap justify-center gap-4">
             {personalInfo.email && (

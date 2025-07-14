@@ -1,10 +1,11 @@
-import type { LinksFunction } from "@remix-run/cloudflare";
+import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/cloudflare";
 import {
   Links,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
 } from "@remix-run/react";
 
 import "./tailwind.css";
@@ -22,7 +23,13 @@ export const links: LinksFunction = () => [
   },
 ];
 
+export const loader = async ({ context }: LoaderFunctionArgs) => {
+  const analyticsToken = context.cloudflare.env.CF_SITE_TAG;
+  return { analyticsToken };
+};
+
 export function Layout({ children }: { children: React.ReactNode }) {
+  const { analyticsToken } = useLoaderData<typeof loader>();
   return (
     <html lang="en">
       <head>
@@ -35,6 +42,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
         {children}
         <ScrollRestoration />
         <Scripts />
+        {analyticsToken && (
+          <script
+            defer
+            src="https://static.cloudflareinsights.com/beacon.min.js"
+            data-cf-beacon={`{"token": "${analyticsToken}"}`}
+          />
+        )}
       </body>
     </html>
   );
