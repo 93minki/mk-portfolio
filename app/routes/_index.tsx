@@ -51,7 +51,6 @@ export const loader = async ({ context }: LoaderFunctionArgs) => {
     experiencesResults,
     skillsResults,
     velogPosts,
-    analyticsData,
   ] = await Promise.all([
     context.cloudflare.env.DB.prepare("SELECT * FROM personal_info").all(),
     context.cloudflare.env.DB.prepare(
@@ -64,8 +63,17 @@ export const loader = async ({ context }: LoaderFunctionArgs) => {
       "SELECT * FROM skills ORDER BY category, proficiency DESC, name"
     ).all(),
     fetchVelogPosts("93minki", 3),
-    getSimpleAnalytics(context.cloudflare.env),
   ]);
+
+  // Analytics는 별도로 처리하여 에러가 발생해도 페이지 로딩에 영향 안 주도록
+  let analyticsData = null;
+  let analyticsError = null;
+  try {
+    analyticsData = await getSimpleAnalytics(context.cloudflare.env);
+  } catch (error) {
+    analyticsError = error instanceof Error ? error.message : String(error);
+    console.error("Analytics error:", analyticsError);
+  }
 
   const personalInfo: PersonalInfoData = {};
   for (const row of personalInfoResults.results as Array<{
@@ -90,6 +98,17 @@ export const loader = async ({ context }: LoaderFunctionArgs) => {
     ownerName,
     ownerPosition,
     analyticsData,
+    analyticsError,
+    // 디버깅용 환경변수 정보
+    envDebug: {
+      hasApiToken: !!context.cloudflare.env.CF_API_TOKEN,
+      hasAccountId: !!context.cloudflare.env.CF_ACCOUNT_ID,
+      hasSiteTag: !!context.cloudflare.env.CF_SITE_TAG,
+      apiTokenStart:
+        context.cloudflare.env.CF_API_TOKEN?.substring(0, 10) || "none",
+      accountId: context.cloudflare.env.CF_ACCOUNT_ID || "none",
+      siteTag: context.cloudflare.env.CF_SITE_TAG || "none",
+    },
   };
 };
 
@@ -102,10 +121,14 @@ export default function Index() {
     velogPosts,
     ownerName,
     analyticsData,
+    analyticsError,
+    envDebug,
   } = useLoaderData<typeof loader>();
 
   // 클라이언트에서 analytics 데이터 확인
   console.log("Client side - Analytics data:", analyticsData);
+  console.log("Client side - Analytics error:", analyticsError);
+  console.log("Client side - Environment debug:", envDebug);
 
   // 카테고리별로 스킬 그룹핑
   const skillsByCategory = skills.reduce((acc, skill) => {

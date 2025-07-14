@@ -23,6 +23,16 @@ interface AnalyticsResponse {
 export async function getSimpleAnalytics(
   env: CloudflareEnv
 ): Promise<SimpleAnalyticsData | null> {
+  // 함수 호출 여부 확인
+  throw new Error(
+    "Analytics function was called! Env check: " +
+      JSON.stringify({
+        hasApiToken: !!env.CF_API_TOKEN,
+        hasAccountId: !!env.CF_ACCOUNT_ID,
+        hasSiteTag: !!env.CF_SITE_TAG,
+      })
+  );
+
   // 환경변수 체크 및 로깅
   console.log("Analytics function called");
   console.log("Environment variables:", {
