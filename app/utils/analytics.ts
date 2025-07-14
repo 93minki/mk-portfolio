@@ -23,6 +23,20 @@ interface AnalyticsResponse {
 export async function getSimpleAnalytics(
   env: CloudflareEnv
 ): Promise<SimpleAnalyticsData | null> {
+  // 환경변수 체크 및 로깅
+  console.log("Analytics function called");
+  console.log("Environment variables:", {
+    hasApiToken: !!env.CF_API_TOKEN,
+    hasAccountId: !!env.CF_ACCOUNT_ID,
+    hasSiteTag: !!env.CF_SITE_TAG,
+  });
+
+  // 환경변수가 없으면 일찍 반환
+  if (!env.CF_API_TOKEN || !env.CF_ACCOUNT_ID || !env.CF_SITE_TAG) {
+    console.log("Missing required environment variables for analytics");
+    return null;
+  }
+
   try {
     const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
     const thirtyDaysAgo = new Date();
