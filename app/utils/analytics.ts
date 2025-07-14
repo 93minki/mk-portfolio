@@ -23,18 +23,8 @@ interface AnalyticsResponse {
 export async function getSimpleAnalytics(
   env: CloudflareEnv
 ): Promise<SimpleAnalyticsData | null> {
-  // 함수 호출 여부 확인
-  throw new Error(
-    "Analytics function was called! Env check: " +
-      JSON.stringify({
-        hasApiToken: !!env.CF_API_TOKEN,
-        hasAccountId: !!env.CF_ACCOUNT_ID,
-        hasSiteTag: !!env.CF_SITE_TAG,
-      })
-  );
-
   // 환경변수 체크 및 로깅
-  console.log("Analytics function called");
+  console.log("Analytics function called - all env vars are present!");
   console.log("Environment variables:", {
     hasApiToken: !!env.CF_API_TOKEN,
     hasAccountId: !!env.CF_ACCOUNT_ID,
@@ -48,6 +38,7 @@ export async function getSimpleAnalytics(
   }
 
   try {
+    console.log("🚀 Starting API calls...");
     const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -57,6 +48,9 @@ export async function getSimpleAnalytics(
       Authorization: `Bearer ${env.CF_API_TOKEN}`,
       "Content-Type": "application/json",
     };
+
+    console.log("📅 Date range:", { today, thirtyDaysAgoStr });
+    console.log("🔗 About to call APIs...");
 
     // 2개 API 호출
     const [todayResponse, totalResponse] = await Promise.all([
@@ -73,13 +67,22 @@ export async function getSimpleAnalytics(
       ),
     ]);
 
+    console.log("✅ API calls completed, parsing JSON...");
+
     const [todayData, totalData] = await Promise.all([
       todayResponse.json() as Promise<AnalyticsResponse>,
       totalResponse.json() as Promise<AnalyticsResponse>,
     ]);
 
+    console.log("📊 API Responses:", {
+      todaySuccess: todayData.success,
+      totalSuccess: totalData.success,
+      todayDataLength: todayData.result?.data?.length || 0,
+      totalDataLength: totalData.result?.data?.length || 0,
+    });
+
     if (!todayData.success || !totalData.success) {
-      console.error("Analytics API Error");
+      console.error("Analytics API Error:", { todayData, totalData });
       return null;
     }
 
@@ -93,12 +96,14 @@ export async function getSimpleAnalytics(
         0
       ) || 0;
 
+    console.log("🎯 Final result:", { todayVisits, totalVisits });
+
     return {
       todayVisits,
       totalVisits,
     };
   } catch (error) {
-    console.error("Analytics Error:", error);
+    console.error("💥 Analytics Error:", error);
     return null;
   }
 }
