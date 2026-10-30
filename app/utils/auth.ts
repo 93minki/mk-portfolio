@@ -1,5 +1,7 @@
+import { createHash, timingSafeEqual } from "node:crypto";
 import { createCookieSessionStorage, redirect } from "react-router";
 import { env } from "~/lib/env.server";
+import { clearLoginFailures, getClientKey, isLoginBlocked, recordLoginFailure } from "~/lib/login-rate-limit.server";
 
 // 세션 쿠키 설정
 export function createAuthSessionStorage() {
@@ -34,11 +36,18 @@ export async function requireAdmin(request: Request) {
 
 // 로그인 처리
 export async function loginAdmin(request: Request, password: string) {
-  const adminPassword = env.ADMIN_PASSWORD;
+  const key = getClientKey(request);
+  if (isLoginBlocked(key)) {
+    return { error: "로그인 시도가 너무 많습니다. 15분 후 다시 시도해주세요.", blocked: true as const };
+  }
 
-  if (!adminPassword || password !== adminPassword) {
+  const passwordHash = createHash("sha256").update(password).digest();
+  const adminPasswordHash = createHash("sha256").update(env.ADMIN_PASSWORD).digest();
+  if (!timingSafeEqual(passwordHash, adminPasswordHash)) {
+    recordLoginFailure(key);
     return { error: "비밀번호가 잘못되었습니다." };
   }
+  clearLoginFailures(key);
 
   const sessionStorage = createAuthSessionStorage();
   const session = await sessionStorage.getSession(

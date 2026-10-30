@@ -9,7 +9,8 @@
     "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",
-    "db:import": "node scripts/db-import.mjs"
+    "db:import": "node scripts/db-import.mjs",
+    "test": "node --test scripts/*.test.mjs"
   },
   "dependencies": {
     "@react-router/node": "^8.5.1",

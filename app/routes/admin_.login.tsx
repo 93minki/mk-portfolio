@@ -1,5 +1,5 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "react-router";
-import { Form, redirect, useActionData } from "react-router";
+import { data, Form, redirect, useActionData } from "react-router";
 import { isAdminLoggedIn, loginAdmin } from "~/utils/auth";
 
 type ActionData = {
@@ -37,6 +37,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   try {
     const result = await loginAdmin(request, password);
+
+    if (result.blocked) {
+      return data({ error: result.error }, { status: 429 });
+    }
 
     if (result.error) {
       return { error: result.error };

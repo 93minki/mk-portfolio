@@ -87,7 +87,9 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     .filter((t) => t.length > 0);
   const techStackJson = JSON.stringify(techArray);
 
-  const imageUrlArray = image_url!.split("\n");
+  const imageUrlArray = image_url
+    ? image_url.split("\n").filter((url) => url.trim() !== "")
+    : [];
   const imageUrlJson = JSON.stringify(imageUrlArray);
 
   try {

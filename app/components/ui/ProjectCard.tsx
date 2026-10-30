@@ -44,13 +44,17 @@ export default function ProjectCard({
     }
   };
 
+  const coverImage: string | undefined = project.image_url
+    ? JSON.parse(project.image_url)[0]
+    : undefined;
+
   return (
     <div className="group bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg hover:shadow-2xl dark:shadow-gray-900/30 transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 dark:border-gray-700">
       {/* 프로젝트 이미지 영역 */}
       <div className="w-full h-48 bg-linear-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-xl mb-6 flex items-center justify-center overflow-hidden">
-        {project.image_url ? (
+        {coverImage ? (
           <img
-            src={JSON.parse(project.image_url)[0]}
+            src={coverImage}
             alt={project.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
