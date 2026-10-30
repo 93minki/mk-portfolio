@@ -29,8 +29,8 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
   };
 };
 
-export const meta: MetaFunction<typeof loader> = ({ data }) => {
-  if (!data) {
+export const meta: MetaFunction<typeof loader> = ({ loaderData }) => {
+  if (!loaderData) {
     return [
       { title: "프로젝트를 찾을 수 없습니다" },
       { name: "description", content: "요청하신 프로젝트를 찾을 수 없습니다." },
@@ -38,7 +38,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
     ];
   }
 
-  const { project, ownerName } = data;
+  const { project, ownerName } = loaderData;
   const projectTitle = `${project.title} - ${ownerName} 포트폴리오`;
   const projectDescription =
     project.description || `${ownerName}의 프로젝트 상세 정보`;

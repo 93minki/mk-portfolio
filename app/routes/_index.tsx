@@ -23,10 +23,10 @@ type PersonalInfoData = {
   velog?: string;
 };
 
-export const meta: MetaFunction<typeof loader> = ({ data }) => {
-  const ownerName = data?.personalInfo?.name || "Portfolio Owner";
-  const ownerTitle = data?.personalInfo?.title || "Developer";
-  const ownerBio = data?.personalInfo?.bio || "모던 웹 개발";
+export const meta: MetaFunction<typeof loader> = ({ loaderData }) => {
+  const ownerName = loaderData?.personalInfo?.name || "Portfolio Owner";
+  const ownerTitle = loaderData?.personalInfo?.title || "Developer";
+  const ownerBio = loaderData?.personalInfo?.bio || "모던 웹 개발";
 
   return [
     { title: `${ownerName} - ${ownerTitle}` },
