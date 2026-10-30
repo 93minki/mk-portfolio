@@ -1,10 +1,5 @@
-import type {
-  ActionFunctionArgs,
-  LoaderFunctionArgs,
-  MetaFunction,
-} from "@remix-run/cloudflare";
-import { redirect } from "@remix-run/cloudflare";
-import { Link, useLoaderData } from "@remix-run/react";
+import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "react-router";
+import { redirect , Link, useLoaderData } from "react-router";
 import { logoutAdmin } from "~/utils/auth";
 
 export const meta: MetaFunction = () => {

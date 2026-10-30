@@ -1,9 +1,5 @@
-import type {
-  ActionFunctionArgs,
-  LoaderFunctionArgs,
-  MetaFunction,
-} from "@remix-run/cloudflare";
-import { Form, redirect, useActionData } from "@remix-run/react";
+import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "react-router";
+import { Form, redirect, useActionData } from "react-router";
 import { isAdminLoggedIn, loginAdmin } from "~/utils/auth";
 
 type ActionData = {

@@ -1,9 +1,5 @@
-import type {
-  ActionFunctionArgs,
-  LoaderFunctionArgs,
-} from "@remix-run/cloudflare";
-import { redirect } from "@remix-run/cloudflare";
-import { Outlet } from "@remix-run/react";
+import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
+import { redirect , Outlet } from "react-router";
 import AdminLayout from "~/components/admin/AdminLayout";
 import { logoutAdmin, requireAdmin } from "~/utils/auth";
 

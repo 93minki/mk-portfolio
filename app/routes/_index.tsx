@@ -1,5 +1,5 @@
-import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
-import { useLoaderData } from "@remix-run/react";
+import type { LoaderFunctionArgs, MetaFunction } from "react-router";
+import { useLoaderData } from "react-router";
 import ExperienceCard from "~/components/experience/ExperienceCard";
 import SkillCard from "~/components/skills/SkillCard";
 import ProjectCard from "~/components/ui/ProjectCard";

@@ -1,5 +1,4 @@
-import { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/cloudflare";
-import { Form, Link, useActionData, useLoaderData } from "@remix-run/react";
+import { ActionFunctionArgs, LoaderFunctionArgs , Form, Link, useActionData, useLoaderData } from "react-router";
 import { Skill } from "~/types/skill";
 import { SKILL_CATEGORIES } from "~/utils/categories";
 

@@ -1,5 +1,4 @@
-import { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/cloudflare";
-import { Form, Link, useActionData, useLoaderData } from "@remix-run/react";
+import { ActionFunctionArgs, LoaderFunctionArgs , Form, Link, useActionData, useLoaderData } from "react-router";
 import type { PersonalInfo } from "~/types/personal_info";
 
 export const loader = async ({ context }: LoaderFunctionArgs) => {

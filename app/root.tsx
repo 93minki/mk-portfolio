@@ -1,12 +1,5 @@
-import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/cloudflare";
-import {
-  Links,
-  Meta,
-  Outlet,
-  Scripts,
-  ScrollRestoration,
-  useLoaderData,
-} from "@remix-run/react";
+import type { LinksFunction, LoaderFunctionArgs } from "react-router";
+import { Links, Meta, Outlet, Scripts, ScrollRestoration, useRouteLoaderData } from "react-router";
 
 import "./tailwind.css";
 
@@ -29,7 +22,7 @@ export const loader = async ({ context }: LoaderFunctionArgs) => {
 };
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const { analyticsToken } = useLoaderData<typeof loader>();
+  const analyticsToken = useRouteLoaderData<typeof loader>("root")?.analyticsToken;
   return (
     <html lang="en">
       <head>

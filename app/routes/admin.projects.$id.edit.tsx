@@ -1,7 +1,6 @@
 // 수정
 
-import { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/cloudflare";
-import { Link, redirect, useActionData, useLoaderData } from "@remix-run/react";
+import { ActionFunctionArgs, LoaderFunctionArgs , Link, redirect, useActionData, useLoaderData } from "react-router";
 import ProjectForm from "~/components/projects/ProjectForm";
 import { Project } from "~/types/project";
 

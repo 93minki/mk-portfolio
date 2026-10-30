@@ -1,8 +1,5 @@
-import type {
-  ActionFunctionArgs,
-  LoaderFunctionArgs,
-} from "@remix-run/cloudflare";
-import { Link, useFetcher, useLoaderData } from "@remix-run/react";
+import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
+import { Link, useFetcher, useLoaderData } from "react-router";
 import type { Project } from "~/types/project";
 
 export const loader = async ({ context }: LoaderFunctionArgs) => {

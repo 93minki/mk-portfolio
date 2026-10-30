@@ -1,4 +1,4 @@
-import { createCookieSessionStorage, redirect } from "@remix-run/cloudflare";
+import { createCookieSessionStorage, redirect } from "react-router";
 import type { Env } from "../../load-context";
 
 // 세션 쿠키 설정
