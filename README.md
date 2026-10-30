@@ -58,9 +58,31 @@ npm run dev
 
 http://localhost:5173 에서 확인 가능합니다. 운영 서버는 `npm run build && npm start`로 실행합니다.
 
+## Docker로 실행
+
+`.env.example`을 `.env`로 복사하고 `ADMIN_PASSWORD`와 `SESSION_SECRET`을 설정합니다.
+
+```bash
+docker compose up -d --build
+```
+
+http://localhost:3000 에서 확인합니다. SQL 데이터를 가져오려면 `backup` 폴더에 파일을 넣고 실행합니다.
+
+```bash
+docker compose stop app
+docker compose run --rm -v "$PWD/backup:/backup:ro" app node scripts/db-import.mjs /backup/<파일>.sql
+docker compose start app
+```
+
+Cloudflare 터널을 사용하려면 `.env`에 `TUNNEL_TOKEN`을 설정하고 실행합니다.
+
+```bash
+docker compose --profile tunnel up -d
+```
+
 ## 🗃️ 데이터베이스
 
-SQLite 파일은 기본적으로 `data/portfolio.sqlite`에 생성되며 `DATABASE_PATH`로 변경할 수 있습니다. 앱은 실행 시 테이블을 자동 생성합니다. 샘플 데이터나 기존 SQL 내보내기 파일은 `npm run db:import -- <파일 경로>`로 가져옵니다. 데이터가 있는 DB는 가져오기를 거부하며, `--force`는 기존 DB 파일을 삭제하고 교체합니다.
+SQLite 파일은 기본적으로 `data/portfolio.sqlite`에 생성되며 `DATABASE_PATH`로 변경할 수 있습니다. Docker에서는 `portfolio-data` 볼륨의 `/data/portfolio.sqlite`를 사용합니다. 앱은 실행 시 테이블을 자동 생성합니다. 샘플 데이터나 기존 SQL 내보내기 파일은 `npm run db:import -- <파일 경로>`로 가져옵니다. 데이터가 있는 DB는 가져오기를 거부하며, `--force`는 기존 DB 파일을 삭제하고 교체합니다.
 
 테이블: `personal_info`, `experiences`, `projects`, `skills`.
 
@@ -98,7 +120,7 @@ mk-portfolio/
 
 ## 🔧 환경 변수
 
-`.env.example`을 `.env`로 복사하고 `ADMIN_PASSWORD`, `SESSION_SECRET`을 설정합니다. 선택 항목은 `OWNER_NAME`, `OWNER_POSITION`, `CF_SITE_TAG`, `DATABASE_PATH`, `NODE_ENV`입니다. 프로세스 환경 변수는 `.env`보다 우선합니다.
+`.env.example`을 `.env`로 복사하고 `ADMIN_PASSWORD`, `SESSION_SECRET`을 설정합니다. 선택 항목은 `OWNER_NAME`, `OWNER_POSITION`, `CF_SITE_TAG`, `DATABASE_PATH`, `NODE_ENV`, `TUNNEL_TOKEN`입니다. 프로세스 환경 변수는 `.env`보다 우선합니다.
 
 ## 📊 성능 최적화
 

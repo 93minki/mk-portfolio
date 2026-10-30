@@ -1,0 +1,27 @@
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_PATH: /data/portfolio.sqlite
+      NODE_ENV: production
+    volumes:
+      - portfolio-data:/data
+    ports:
+      - "127.0.0.1:3000:3000"
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:-}
+    depends_on:
+      app:
+        condition: service_healthy
+    profiles:
+      - tunnel
+
+volumes:
+  portfolio-data:
