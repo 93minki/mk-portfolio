@@ -115,7 +115,7 @@ export default function Index() {
   const getLocation = () => personalInfo.location || "Seoul, South Korea";
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors">
+    <div className="min-h-screen bg-linear-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors">
       {/* 테마 토글 버튼 - 고정 위치 */}
       <div className="fixed top-4 right-4 z-50">
         <ThemeToggle />
@@ -125,7 +125,7 @@ export default function Index() {
       <div className="max-w-7xl mx-auto px-4 py-20 md:py-32">
         <div className="text-center">
           <div className="mb-8">
-            <div className="w-32 h-32 mx-auto mb-6 bg-gradient-to-br from-blue-400 to-purple-500 dark:from-blue-500 dark:to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+            <div className="w-32 h-32 mx-auto mb-6 bg-linear-to-br from-blue-400 to-purple-500 dark:from-blue-500 dark:to-purple-600 rounded-full flex items-center justify-center shadow-lg">
               <span className="text-4xl font-bold text-white">
                 {getName().charAt(0)}
               </span>
@@ -134,7 +134,7 @@ export default function Index() {
 
           <h1 className="text-5xl md:text-7xl font-bold text-gray-900 dark:text-white mb-6">
             안녕하세요,{" "}
-            <span className="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
               {getName()}
             </span>
             입니다
@@ -326,7 +326,7 @@ export default function Index() {
         )}
       </div>
       {/* Skills & Technologies */}
-      <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm transition-colors">
+      <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-xs transition-colors">
         <div className="max-w-7xl mx-auto px-4 py-12 md:py-16">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
@@ -372,7 +372,7 @@ export default function Index() {
               {sortedCategories.map((category) => (
                 <div
                   key={category}
-                  className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 p-6 transition-colors"
+                  className="bg-white dark:bg-gray-800 rounded-lg shadow-xs border border-gray-100 dark:border-gray-700 p-6 transition-colors"
                 >
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                     {getCategoryLabel(category)}

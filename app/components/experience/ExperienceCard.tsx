@@ -31,7 +31,7 @@ export default function ExperienceCard({ experience }: ExperienceCardProps) {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100 dark:border-gray-700">
+    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-xs hover:shadow-md transition-all duration-200 border border-gray-100 dark:border-gray-700">
       <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-4">
         <div className="mb-2 md:mb-0">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">

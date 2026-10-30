@@ -26,11 +26,11 @@
     "@eslint/js": "^9.39.5",
     "@react-router/dev": "^8.5.1",
     "@react-router/fs-routes": "^8.5.1",
+    "@tailwindcss/vite": "^4.3.3",
     "@types/better-sqlite3": "^7.6.13",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@types/xml2js": "^0.4.14",
-    "autoprefixer": "^10.4.19",
     "eslint": "^9.39.5",
     "eslint-import-resolver-typescript": "^4.4.5",
     "eslint-plugin-import": "^2.28.1",
@@ -38,12 +38,10 @@
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.13.0",
-    "postcss": "^8.4.38",
-    "tailwindcss": "^3.4.4",
+    "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.72.1",
-    "vite": "^8.3.5",
-    "vite-tsconfig-paths": "^6.1.1"
+    "vite": "^8.3.5"
   },
   "engines": {
     "node": ">=22.22.0"

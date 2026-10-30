@@ -12,7 +12,7 @@ export default function SkillCard({ skill }: SkillCardProps) {
   return (
     <div
       key={skill.id}
-      className="flex gap-4 items-center bg-white dark:bg-gray-700 rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100 dark:border-gray-600 hover:border-blue-200 dark:hover:border-blue-400 text-center"
+      className="flex gap-4 items-center bg-white dark:bg-gray-700 rounded-lg p-4 shadow-xs hover:shadow-md transition-all duration-200 border border-gray-100 dark:border-gray-600 hover:border-blue-200 dark:hover:border-blue-400 text-center"
     >
       {iconUrl && (
         <div className="">

@@ -15,10 +15,10 @@
 
 ### Frontend
 
-- **Framework**: [React Router](https://reactrouter.com/) 7.18
-- **Build Tool**: [Vite](https://vitejs.dev/) 6.0.0
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/) 3.4.4
-- **Language**: TypeScript 5.1.6
+- **Framework**: [React Router](https://reactrouter.com/) 8.5
+- **Build Tool**: [Vite](https://vitejs.dev/) 8.3
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) 4.3
+- **Language**: TypeScript 6.0
 - **Icons**: [Simple Icons](https://simpleicons.org/)
 
 ### Backend & Infrastructure

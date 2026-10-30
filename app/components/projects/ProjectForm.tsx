@@ -25,7 +25,7 @@ export default function ProjectForm({ project, actionData }: ProjectFormProps) {
 
   return (
     <div className="max-w-3xl p-6">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-colors">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xs border border-gray-200 dark:border-gray-700 p-6 transition-colors">
         <Form method="post" className="space-y-6">
           {/* 제목 */}
           <div>
@@ -39,7 +39,7 @@ export default function ProjectForm({ project, actionData }: ProjectFormProps) {
               type="text"
               id="title"
               name="title"
-              className="block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 p-4 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
+              className="block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-xs focus:ring-blue-500 focus:border-blue-500 p-4 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
               placeholder="예: React Todo App"
               defaultValue={project?.title}
             />
@@ -62,7 +62,7 @@ export default function ProjectForm({ project, actionData }: ProjectFormProps) {
               id="description"
               name="description"
               rows={3}
-              className="block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 p-4 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
+              className="block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-xs focus:ring-blue-500 focus:border-blue-500 p-4 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
               placeholder="TypeScript와 Tailwind CSS를 사용한 모던한 Todo 애플리케이션..."
               defaultValue={project?.description}
             />
@@ -85,7 +85,7 @@ export default function ProjectForm({ project, actionData }: ProjectFormProps) {
               id="long_description"
               name="long_description"
               rows={5}
-              className="block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 p-4 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
+              className="block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-xs focus:ring-blue-500 focus:border-blue-500 p-4 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
               placeholder="프로젝트의 배경, 사용한 기술, 도전한 점, 배운 점 등을 자세히 설명..."
               defaultValue={project?.long_description}
             />
@@ -103,7 +103,7 @@ export default function ProjectForm({ project, actionData }: ProjectFormProps) {
               type="text"
               id="tech_stack"
               name="tech_stack"
-              className="block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 p-4 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
+              className="block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-xs focus:ring-blue-500 focus:border-blue-500 p-4 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
               placeholder="React, TypeScript, Tailwind CSS, Vite"
               defaultValue={project?.tech_stack}
             />
@@ -125,7 +125,7 @@ export default function ProjectForm({ project, actionData }: ProjectFormProps) {
             <select
               id="category"
               name="category"
-              className="block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 p-4 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
+              className="block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-xs focus:ring-blue-500 focus:border-blue-500 p-4 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
               defaultValue={project?.category}
             >
               <option value="">선택하세요</option>
@@ -153,7 +153,7 @@ export default function ProjectForm({ project, actionData }: ProjectFormProps) {
             <select
               id="status"
               name="status"
-              className="block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 p-4 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
+              className="block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-xs focus:ring-blue-500 focus:border-blue-500 p-4 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
               defaultValue={project?.status}
             >
               <option value="completed">완료</option>
@@ -175,7 +175,7 @@ export default function ProjectForm({ project, actionData }: ProjectFormProps) {
                 type="url"
                 id="demo_url"
                 name="demo_url"
-                className="block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 p-4 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
+                className="block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-xs focus:ring-blue-500 focus:border-blue-500 p-4 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
                 placeholder="https://example.com"
                 defaultValue={project?.demo_url}
               />
@@ -191,7 +191,7 @@ export default function ProjectForm({ project, actionData }: ProjectFormProps) {
                 type="url"
                 id="github_url"
                 name="github_url"
-                className="block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 p-4 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
+                className="block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-xs focus:ring-blue-500 focus:border-blue-500 p-4 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
                 placeholder="https://github.com/username/project"
                 defaultValue={project?.github_url}
               />
@@ -211,7 +211,7 @@ export default function ProjectForm({ project, actionData }: ProjectFormProps) {
               id="image_url"
               name="image_url"
               rows={5}
-              className="block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 p-4 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors resize-none"
+              className="block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-xs focus:ring-blue-500 focus:border-blue-500 p-4 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors resize-none"
               placeholder="https://raw.githubusercontent.com/username/repo/main/image.jpg"
               defaultValue={
                 project && project.image_url
@@ -243,7 +243,7 @@ export default function ProjectForm({ project, actionData }: ProjectFormProps) {
                 id="order_index"
                 name="order_index"
                 min="0"
-                className="block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 p-4 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
+                className="block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-xs focus:ring-blue-500 focus:border-blue-500 p-4 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
                 defaultValue={project?.order_index || 0}
               />
             </div>
@@ -252,7 +252,7 @@ export default function ProjectForm({ project, actionData }: ProjectFormProps) {
                 id="featured"
                 name="featured"
                 type="checkbox"
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:bg-gray-700"
                 defaultChecked={project?.featured}
               />
               <label
@@ -268,7 +268,7 @@ export default function ProjectForm({ project, actionData }: ProjectFormProps) {
           <div className="flex justify-end gap-4 pt-6">
             <Link
               to="/admin/projects"
-              className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+              className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-xs text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
             >
               취소
             </Link>

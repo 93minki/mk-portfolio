@@ -158,7 +158,7 @@ export default function AdminProjects() {
                     {parseTechtack(project.tech_stack).map((tech, index) => (
                       <span
                         key={index}
-                        className="inline-block px-2 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-600 rounded border border-gray-300 dark:border-gray-500"
+                        className="inline-block px-2 py-1 text-xs font-medium text-gray-700 dark:text-gray-300 bg-gray-200 dark:bg-gray-600 rounded-sm border border-gray-300 dark:border-gray-500"
                       >
                         {tech}
                       </span>

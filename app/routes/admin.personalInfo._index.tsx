@@ -113,7 +113,7 @@ export default function PersonalInfo() {
               id="name"
               name="name"
               defaultValue={personalInfo.name || ""}
-              className="p-4 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+              className="p-4 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
               placeholder="김민기"
             />
           </div>
@@ -131,7 +131,7 @@ export default function PersonalInfo() {
               id="title"
               name="title"
               defaultValue={personalInfo.title || ""}
-              className="p-4 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+              className="p-4 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
               placeholder="Frontend Developer"
             />
           </div>
@@ -149,7 +149,7 @@ export default function PersonalInfo() {
               name="bio"
               rows={4}
               defaultValue={personalInfo.bio || ""}
-              className="p-4 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+              className="p-4 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
               placeholder="사용자 경험을 중시하는 Frontend Developer입니다..."
             />
           </div>
@@ -167,7 +167,7 @@ export default function PersonalInfo() {
               id="email"
               name="email"
               defaultValue={personalInfo.email || ""}
-              className="p-4 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+              className="p-4 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
               placeholder="your-email@example.com"
             />
           </div>
@@ -185,7 +185,7 @@ export default function PersonalInfo() {
               id="location"
               name="location"
               defaultValue={personalInfo.location || ""}
-              className="p-4 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+              className="p-4 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
               placeholder="Seoul, South Korea"
             />
           </div>
@@ -203,7 +203,7 @@ export default function PersonalInfo() {
               id="github"
               name="github"
               defaultValue={personalInfo.github || ""}
-              className="p-4 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+              className="p-4 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
               placeholder="https://github.com/username"
             />
           </div>
@@ -221,7 +221,7 @@ export default function PersonalInfo() {
               id="velog"
               name="velog"
               defaultValue={personalInfo.velog || ""}
-              className="p-4 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+              className="p-4 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
               placeholder="https://velog.io/@username"
             />
           </div>
@@ -230,7 +230,7 @@ export default function PersonalInfo() {
           <div className="flex justify-end pt-6">
             <button
               type="submit"
-              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               개인정보 수정하기
             </button>
