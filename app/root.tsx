@@ -1,4 +1,5 @@
-import type { LinksFunction, LoaderFunctionArgs } from "react-router";
+import { env } from "~/lib/env.server";
+import type { LinksFunction } from "react-router";
 import { Links, Meta, Outlet, Scripts, ScrollRestoration, useRouteLoaderData } from "react-router";
 
 import "./tailwind.css";
@@ -16,8 +17,8 @@ export const links: LinksFunction = () => [
   },
 ];
 
-export const loader = async ({ context }: LoaderFunctionArgs) => {
-  const analyticsToken = context.cloudflare.env.CF_SITE_TAG;
+export const loader = async () => {
+  const analyticsToken = env.CF_SITE_TAG;
   return { analyticsToken };
 };
 

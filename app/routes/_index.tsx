@@ -1,4 +1,6 @@
-import type { LoaderFunctionArgs, MetaFunction } from "react-router";
+import { env } from "~/lib/env.server";
+import { db } from "~/lib/db.server";
+import type { MetaFunction } from "react-router";
 import { useLoaderData } from "react-router";
 import ExperienceCard from "~/components/experience/ExperienceCard";
 import SkillCard from "~/components/skills/SkillCard";
@@ -43,29 +45,16 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
   ];
 };
 
-export const loader = async ({ context }: LoaderFunctionArgs) => {
-  const [
-    personalInfoResults,
-    projectsResults,
-    experiencesResults,
-    skillsResults,
-    velogPosts,
-  ] = await Promise.all([
-    context.cloudflare.env.DB.prepare("SELECT * FROM personal_info").all(),
-    context.cloudflare.env.DB.prepare(
-      "SELECT * FROM projects WHERE featured = 1 ORDER BY order_index ASC"
-    ).all(),
-    context.cloudflare.env.DB.prepare(
-      "SELECT * FROM experiences ORDER BY order_index ASC"
-    ).all(),
-    context.cloudflare.env.DB.prepare(
-      "SELECT * FROM skills ORDER BY category, proficiency DESC, name"
-    ).all(),
-    fetchVelogPosts("93minki", 3),
-  ]);
+export const loader = async () => {
+  const velogPostsPromise = fetchVelogPosts("93minki", 3);
+  const personalInfoResults = db.prepare("SELECT * FROM personal_info").all();
+  const projectsResults = db.prepare("SELECT * FROM projects WHERE featured = 1 ORDER BY order_index ASC").all();
+  const experiencesResults = db.prepare("SELECT * FROM experiences ORDER BY order_index ASC").all();
+  const skillsResults = db.prepare("SELECT * FROM skills ORDER BY category, proficiency DESC, name").all();
+  const velogPosts = await velogPostsPromise;
 
   const personalInfo: PersonalInfoData = {};
-  for (const row of personalInfoResults.results as Array<{
+  for (const row of personalInfoResults as Array<{
     key: string;
     value: string;
   }>) {
@@ -74,15 +63,15 @@ export const loader = async ({ context }: LoaderFunctionArgs) => {
 
   // 환경변수 우선 적용
   const ownerName =
-    context.cloudflare.env.OWNER_NAME || personalInfo.name || "Portfolio Owner";
+    env.OWNER_NAME || personalInfo.name || "Portfolio Owner";
   const ownerPosition =
-    context.cloudflare.env.OWNER_POSITION || personalInfo.title || "Developer";
+    env.OWNER_POSITION || personalInfo.title || "Developer";
 
   return {
     personalInfo,
-    projects: projectsResults.results as unknown as Project[],
-    experiences: experiencesResults.results as unknown as Experience[],
-    skills: skillsResults.results as unknown as Skill[],
+    projects: projectsResults as unknown as Project[],
+    experiences: experiencesResults as unknown as Experience[],
+    skills: skillsResults as unknown as Skill[],
     velogPosts,
     ownerName,
     ownerPosition,

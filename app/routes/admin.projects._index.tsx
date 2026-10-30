@@ -1,38 +1,37 @@
-import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
+import { db } from "~/lib/db.server";
+import type { ActionFunctionArgs } from "react-router";
 import { Link, useFetcher, useLoaderData } from "react-router";
 import type { Project } from "~/types/project";
 
-export const loader = async ({ context }: LoaderFunctionArgs) => {
+export const loader = async () => {
   // 인증은 admin.tsx에서 자동 처리됨
-  const result = await context.cloudflare.env.DB.prepare(
+  const result = db.prepare(
     "SELECT * FROM projects ORDER BY order_index ASC, created_at DESC"
   ).all();
 
-  return { projects: result.results as unknown as Project[] };
+  return { projects: result as unknown as Project[] };
 };
 
-export const action = async ({ request, context }: ActionFunctionArgs) => {
+export const action = async ({ request }: ActionFunctionArgs) => {
   // 인증은 admin.tsx에서 자동 처리됨
   const formData = await request.formData();
   const action = formData.get("_action");
 
   if (action === "delete") {
-    const projectId = formData.get("projectId");
-    await context.cloudflare.env.DB.prepare("DELETE FROM projects WHERE id = ?")
-      .bind(projectId)
-      .run();
+    const projectId = formData.get("projectId")?.toString() ?? null;
+    db.prepare("DELETE FROM projects WHERE id = ?")
+      .run(projectId);
     return null;
   }
 
   if (action === "toggle-featured") {
-    const projectId = formData.get("projectId");
+    const projectId = formData.get("projectId")?.toString() ?? null;
     const currentFeatured = formData.get("currentFeatured") === "true";
 
-    await context.cloudflare.env.DB.prepare(
+    db.prepare(
       "UPDATE projects SET featured = ? WHERE id = ?"
     )
-      .bind(!currentFeatured ? 1 : 0, projectId)
-      .run();
+      .run(!currentFeatured ? 1 : 0, projectId);
 
     return null;
   }

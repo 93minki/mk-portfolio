@@ -1,3 +1,4 @@
+import { db } from "~/lib/db.server";
 import type { ActionFunctionArgs } from "react-router";
 import { Link, redirect, useActionData } from "react-router";
 import ProjectForm from "~/components/projects/ProjectForm";
@@ -13,7 +14,7 @@ type ActionData = {
   success?: boolean;
 };
 
-export const action = async ({ request, context }: ActionFunctionArgs) => {
+export const action = async ({ request }: ActionFunctionArgs) => {
   // 인증은 admin.tsx에서 자동 처리됨
   const formData = await request.formData();
 
@@ -90,7 +91,7 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
   const imageUrlJson = JSON.stringify(imageUrlArray);
 
   try {
-    await context.cloudflare.env.DB.prepare(
+    db.prepare(
       `
       INSERT INTO projects (
         title, description, long_description, image_url, tech_stack,
@@ -98,20 +99,19 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `
     )
-      .bind(
-        title,
-        description,
+      .run(
+        title ?? null,
+        description ?? null,
         long_description,
         imageUrlJson,
         techStackJson,
         github_url,
         demo_url,
-        category,
+        category ?? null,
         featured ? 1 : 0,
         status,
         order_index
-      )
-      .run();
+      );
     return redirect("/admin/projects");
   } catch (error) {
     console.log("error", error);

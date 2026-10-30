@@ -1,4 +1,5 @@
-import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "react-router";
+import { db } from "~/lib/db.server";
+import type { ActionFunctionArgs, MetaFunction } from "react-router";
 import { redirect , Link, useLoaderData } from "react-router";
 import { logoutAdmin } from "~/utils/auth";
 
@@ -13,19 +14,11 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export const loader = async ({ context }: LoaderFunctionArgs) => {
+export const loader = async () => {
   // 인증은 admin.tsx에서 자동 처리됨
-  const [projectsCount, skillsCount, featuredCount] = await Promise.all([
-    context.cloudflare.env.DB.prepare(
-      "SELECT COUNT(*) as count FROM projects"
-    ).first(),
-    context.cloudflare.env.DB.prepare(
-      "SELECT COUNT(*) as count FROM skills"
-    ).first(),
-    context.cloudflare.env.DB.prepare(
-      "SELECT COUNT(*) as count FROM projects WHERE featured = 1"
-    ).first(),
-  ]);
+  const projectsCount = db.prepare("SELECT COUNT(*) as count FROM projects").get() as { count: number };
+  const skillsCount = db.prepare("SELECT COUNT(*) as count FROM skills").get() as { count: number };
+  const featuredCount = db.prepare("SELECT COUNT(*) as count FROM projects WHERE featured = 1").get() as { count: number };
 
   return {
     stats: {
@@ -36,12 +29,12 @@ export const loader = async ({ context }: LoaderFunctionArgs) => {
   };
 };
 
-export const action = async ({ request, context }: ActionFunctionArgs) => {
+export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const action = formData.get("_action");
 
   if (action === "logout") {
-    const result = await logoutAdmin(request, context.cloudflare.env);
+    const result = await logoutAdmin(request);
     throw redirect("/", {
       headers: result.headers,
     });

@@ -17,9 +17,9 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-export const loader = async ({ request, context }: LoaderFunctionArgs) => {
+export const loader = async ({ request }: LoaderFunctionArgs) => {
   // 이미 로그인되어 있으면 관리자 대시보드로 리디렉션
-  const isLoggedIn = await isAdminLoggedIn(request, context.cloudflare.env);
+  const isLoggedIn = await isAdminLoggedIn(request);
   if (isLoggedIn) {
     throw redirect("/admin");
   }
@@ -27,7 +27,7 @@ export const loader = async ({ request, context }: LoaderFunctionArgs) => {
   return null;
 };
 
-export const action = async ({ request, context }: ActionFunctionArgs) => {
+export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const password = formData.get("password")?.toString();
 
@@ -36,7 +36,7 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
   }
 
   try {
-    const result = await loginAdmin(request, password, context.cloudflare.env);
+    const result = await loginAdmin(request, password);
 
     if (result.error) {
       return { error: result.error };

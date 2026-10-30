@@ -1,14 +1,15 @@
-import { ActionFunctionArgs, LoaderFunctionArgs , Form, Link, useActionData, useLoaderData } from "react-router";
+import { db } from "~/lib/db.server";
+import { ActionFunctionArgs , Form, Link, useActionData, useLoaderData } from "react-router";
 import type { PersonalInfo } from "~/types/personal_info";
 
-export const loader = async ({ context }: LoaderFunctionArgs) => {
-  const personalInfoRaw = await context.cloudflare.env.DB.prepare(
+export const loader = async () => {
+  const personalInfoRaw = db.prepare(
     "SELECT * FROM personal_info"
   ).all();
 
   // key-value 배열을 객체로 변형
   const personalInfo = (
-    personalInfoRaw.results as unknown as PersonalInfo[]
+    personalInfoRaw as unknown as PersonalInfo[]
   ).reduce((acc, item) => {
     acc[item.key] = item.value;
     return acc;
@@ -22,7 +23,7 @@ type ActionData = {
   error?: string;
 };
 
-export const action = async ({ request, context }: ActionFunctionArgs) => {
+export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
 
   // 업데이트할 필드들
@@ -42,7 +43,7 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
       const value = formData.get(field)?.toString() || "";
 
       // UPSERT (UPDATE or INSERT) 쿼리
-      await context.cloudflare.env.DB.prepare(
+      db.prepare(
         `
         INSERT INTO personal_info (key, value, created_at, updated_at) 
         VALUES (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
@@ -51,8 +52,7 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
           updated_at = CURRENT_TIMESTAMP
       `
       )
-        .bind(field, value)
-        .run();
+        .run(field, value);
     }
 
     return { success: true };

@@ -1,17 +1,17 @@
+import { db } from "~/lib/db.server";
 // 수정
 
 import { ActionFunctionArgs, LoaderFunctionArgs , Link, redirect, useActionData, useLoaderData } from "react-router";
 import ProjectForm from "~/components/projects/ProjectForm";
 import { Project } from "~/types/project";
 
-export const loader = async ({ context, params }: LoaderFunctionArgs) => {
+export const loader = async ({ params }: LoaderFunctionArgs) => {
   const { id } = params;
 
-  const project = await context.cloudflare.env.DB.prepare(
+  const project = db.prepare(
     "SELECT * FROM projects WHERE id = ?"
   )
-    .bind(id)
-    .first();
+    .get(id ?? null) as Project | undefined;
 
   if (!project) {
     throw new Response("프로젝트를 찾을 수 없습니다", { status: 404 });
@@ -42,7 +42,6 @@ type ActionData = {
 
 export const action = async ({
   request,
-  context,
   params,
 }: ActionFunctionArgs) => {
   // 인증은 admin.tsx에서 자동 처리됨
@@ -127,7 +126,7 @@ export const action = async ({
   const imageUrlJson = JSON.stringify(imageUrlArray);
 
   try {
-    await context.cloudflare.env.DB.prepare(
+    db.prepare(
       `
       UPDATE projects SET
         title = ?, 
@@ -144,21 +143,20 @@ export const action = async ({
       WHERE id = ?
     `
     )
-      .bind(
-        title,
-        description,
+      .run(
+        title ?? null,
+        description ?? null,
         long_description,
         imageUrlJson,
         techStackJson,
         github_url,
         demo_url,
-        category,
+        category ?? null,
         featured ? 1 : 0,
         status,
         order_index,
-        id
-      )
-      .run();
+        id ?? null
+      );
 
     return redirect("/admin/projects");
   } catch (error) {

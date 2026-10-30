@@ -1,13 +1,14 @@
-import { ActionFunctionArgs, LoaderFunctionArgs , Form, Link, useActionData, useLoaderData, useNavigation } from "react-router";
+import { db } from "~/lib/db.server";
+import { ActionFunctionArgs , Form, Link, useActionData, useLoaderData, useNavigation } from "react-router";
 import { useEffect, useRef } from "react";
 import { Experience } from "~/types/experience";
 
-export const loader = async ({ context }: LoaderFunctionArgs) => {
-  const experiences = await context.cloudflare.env.DB.prepare(
+export const loader = async () => {
+  const experiences = db.prepare(
     "SELECT * FROM experiences ORDER BY is_current DESC, start_date DESC"
   ).all();
 
-  return { experiences: experiences.results as unknown as Experience[] };
+  return { experiences: experiences as unknown as Experience[] };
 };
 
 type ActionData = {
@@ -16,7 +17,7 @@ type ActionData = {
   action?: string;
 };
 
-export const action = async ({ request, context }: ActionFunctionArgs) => {
+export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const action = formData.get("_action");
 
@@ -28,11 +29,10 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
         return { error: "경력 ID가 필요합니다." };
       }
 
-      await context.cloudflare.env.DB.prepare(
+      db.prepare(
         "DELETE FROM experiences WHERE id = ?"
       )
-        .bind(experienceId)
-        .run();
+        .run(experienceId);
 
       return { success: true, action: "delete" };
     }
@@ -50,10 +50,10 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
         return { error: "회사명, 직책, 시작일은 필수입니다." };
       }
 
-      await context.cloudflare.env.DB.prepare(
+      db.prepare(
         "INSERT INTO experiences (company_name, position, description, start_date, end_date, is_current, location) VALUES (?, ?, ?, ?, ?, ?, ?)"
       )
-        .bind(
+        .run(
           company_name,
           position,
           description || null,
@@ -61,8 +61,7 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
           is_current ? null : end_date || null,
           is_current ? 1 : 0,
           location || null
-        )
-        .run();
+        );
 
       return { success: true, action: "add" };
     }

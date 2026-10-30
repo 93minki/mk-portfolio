@@ -1,14 +1,15 @@
-import { ActionFunctionArgs, LoaderFunctionArgs , Form, Link, useActionData, useLoaderData } from "react-router";
+import { db } from "~/lib/db.server";
+import { ActionFunctionArgs , Form, Link, useActionData, useLoaderData } from "react-router";
 import { Skill } from "~/types/skill";
 import { SKILL_CATEGORIES } from "~/utils/categories";
 
-export const loader = async ({ context }: LoaderFunctionArgs) => {
-  const skills = await context.cloudflare.env.DB.prepare(
+export const loader = async () => {
+  const skills = db.prepare(
     "SELECT * FROM skills ORDER BY category, proficiency DESC, name"
   ).all();
 
   return {
-    skills: skills.results as unknown as Skill[],
+    skills: skills as unknown as Skill[],
     categories: SKILL_CATEGORIES,
   };
 };
@@ -19,7 +20,7 @@ type ActionData = {
   action?: string;
 };
 
-export const action = async ({ request, context }: ActionFunctionArgs) => {
+export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const action = formData.get("_action")?.toString();
 
@@ -31,9 +32,8 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
         return { error: "스킬 ID가 필요합니다." };
       }
 
-      await context.cloudflare.env.DB.prepare("DELETE FROM skills WHERE id = ?")
-        .bind(skillId)
-        .run();
+      db.prepare("DELETE FROM skills WHERE id = ?")
+        .run(skillId);
 
       return { success: true, action: "delete" };
     }
@@ -51,22 +51,20 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
       }
 
       // 중복 체크
-      const existingSkill = await context.cloudflare.env.DB.prepare(
+      const existingSkill = db.prepare(
         "SELECT id FROM skills WHERE name = ?"
       )
-        .bind(name)
-        .first();
+        .get(name);
 
       if (existingSkill) {
         return { error: "이미 존재하는 스킬입니다." };
       }
 
       try {
-        await context.cloudflare.env.DB.prepare(
+        db.prepare(
           "INSERT INTO skills (name, category, proficiency, icon_name) VALUES (?, ?, ?, ?)"
         )
-          .bind(name, category, proficiency, iconName || null)
-          .run();
+          .run(name, category, proficiency, iconName || null);
 
         return { success: true, action: "add" };
       } catch (dbError) {

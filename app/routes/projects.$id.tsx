@@ -1,25 +1,26 @@
+import { env } from "~/lib/env.server";
+import { db } from "~/lib/db.server";
 import type { LoaderFunctionArgs, MetaFunction } from "react-router";
 import { Link, useLoaderData } from "react-router";
 import "keen-slider/keen-slider.min.css";
 import { useKeenSlider } from "keen-slider/react";
 import type { Project } from "~/types/project";
 
-export const loader = async ({ params, context }: LoaderFunctionArgs) => {
+export const loader = async ({ params }: LoaderFunctionArgs) => {
   const { id } = params;
 
-  const project = await context.cloudflare.env.DB.prepare(
+  const project = db.prepare(
     "SELECT * FROM projects WHERE id = ?"
   )
-    .bind(id)
-    .first();
+    .get(id ?? null);
 
   if (!project) {
     throw new Response("프로젝트를 찾을 수 없습니다", { status: 404 });
   }
 
   // 환경변수에서 소유자 정보 가져오기
-  const ownerName = context.cloudflare.env.OWNER_NAME || "Portfolio Owner";
-  const ownerPosition = context.cloudflare.env.OWNER_POSITION || "Developer";
+  const ownerName = env.OWNER_NAME || "Portfolio Owner";
+  const ownerPosition = env.OWNER_POSITION || "Developer";
 
   return {
     project: project as unknown as Project,
