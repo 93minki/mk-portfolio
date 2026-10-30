@@ -159,7 +159,7 @@ export const action = async ({
       );
 
     return redirect("/admin/projects");
-  } catch (error) {
+  } catch {
     return { errors: { title: "프로젝트 수정 중 오류가 발생했습니다." } };
   }
 };

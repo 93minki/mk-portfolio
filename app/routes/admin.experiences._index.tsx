@@ -67,7 +67,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     }
 
     return { error: "올바르지 않은 요청입니다." };
-  } catch (error) {
+  } catch {
     return { error: "경력 처리 중 오류가 발생했습니다." };
   }
 };

@@ -56,7 +56,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     }
 
     return { success: true };
-  } catch (error) {
+  } catch {
     return { error: "개인정보 업데이트 중 오류가 발생했습니다." };
   }
 };
