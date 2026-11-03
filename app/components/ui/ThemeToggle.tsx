@@ -6,7 +6,7 @@ export default function ThemeToggle() {
   // 서버사이드 렌더링 중에는 아이콘을 표시하지 않음 (hydration 불일치 방지)
   if (!mounted) {
     return (
-      <button className="p-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 transition-colors">
+      <button className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
         <div className="w-5 h-5" /> {/* 플레이스홀더 */}
       </button>
     );

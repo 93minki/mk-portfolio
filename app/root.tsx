@@ -1,4 +1,5 @@
 import { env } from "~/lib/env.server";
+import { themeInitScript } from "~/hooks/useDarkMode";
 import type { LinksFunction } from "react-router";
 import { Links, Meta, Outlet, Scripts, ScrollRestoration, useRouteLoaderData } from "react-router";
 
@@ -25,9 +26,10 @@ export const loader = async () => {
 export function Layout({ children }: { children: React.ReactNode }) {
   const analyticsToken = useRouteLoaderData<typeof loader>("root")?.analyticsToken;
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
