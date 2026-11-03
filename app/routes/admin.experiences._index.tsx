@@ -1,6 +1,7 @@
+import Toast, { type Notice } from "~/components/admin/Toast";
 import { db } from "~/lib/db.server";
 import { ActionFunctionArgs , Form, Link, useActionData, useLoaderData, useNavigation } from "react-router";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { Experience } from "~/types/experience";
 
 export const loader = async () => {
@@ -75,6 +76,11 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 export default function Experiences() {
   const { experiences } = useLoaderData<typeof loader>();
   const actionData = useActionData<ActionData>();
+  const notice = useMemo<Notice | null>(() => {
+    if (actionData?.success) return { tone: "success", message: actionData.action === "add" ? "새 경력이 성공적으로 추가되었습니다!" : "경력이 성공적으로 삭제되었습니다!" };
+    if (actionData?.error) return { tone: "error", message: actionData.error };
+    return null;
+  }, [actionData]);
   const navigation = useNavigation();
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -126,21 +132,7 @@ export default function Experiences() {
         </Link>
       </div>
 
-      {/* 성공/에러 메시지 */}
-      {actionData?.success && (
-        <div className="mb-6 p-4 bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 rounded-md transition-colors">
-          <p className="text-green-800 dark:text-green-300">
-            {actionData.action === "add"
-              ? "새 경력이 성공적으로 추가되었습니다!"
-              : "경력이 성공적으로 삭제되었습니다!"}
-          </p>
-        </div>
-      )}
-      {actionData?.error && (
-        <div className="mb-6 p-4 bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-md transition-colors">
-          <p className="text-red-800 dark:text-red-300">{actionData.error}</p>
-        </div>
-      )}
+      <Toast notice={notice} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* 기존 경력 리스트 */}

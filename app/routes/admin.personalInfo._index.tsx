@@ -1,3 +1,5 @@
+import { useMemo } from "react";
+import Toast, { type Notice } from "~/components/admin/Toast";
 import { db } from "~/lib/db.server";
 import { ActionFunctionArgs , Form, Link, useActionData, useLoaderData } from "react-router";
 import type { PersonalInfo } from "~/types/personal_info";
@@ -64,6 +66,11 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 export default function PersonalInfo() {
   const { personalInfo } = useLoaderData<typeof loader>();
   const actionData = useActionData<ActionData>();
+  const notice = useMemo<Notice | null>(() => {
+    if (actionData?.success) return { tone: "success", message: "개인정보가 성공적으로 업데이트되었습니다!" };
+    if (actionData?.error) return { tone: "error", message: actionData.error };
+    return null;
+  }, [actionData]);
 
   return (
     <div className="p-6 max-w-3xl mx-auto">
@@ -84,19 +91,7 @@ export default function PersonalInfo() {
         </Link>
       </div>
 
-      {/* 성공/에러 메시지 */}
-      {actionData?.success && (
-        <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-md">
-          <p className="text-green-800">
-            개인정보가 성공적으로 업데이트되었습니다!
-          </p>
-        </div>
-      )}
-      {actionData?.error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md">
-          <p className="text-red-800">{actionData.error}</p>
-        </div>
-      )}
+      <Toast notice={notice} />
 
       <div className="max-w-2xl">
         <Form method="post" className="space-y-6">

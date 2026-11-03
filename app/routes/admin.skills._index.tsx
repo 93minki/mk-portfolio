@@ -1,3 +1,5 @@
+import { useMemo } from "react";
+import Toast, { type Notice } from "~/components/admin/Toast";
 import { db } from "~/lib/db.server";
 import { ActionFunctionArgs , Form, Link, useActionData, useLoaderData } from "react-router";
 import { Skill } from "~/types/skill";
@@ -87,6 +89,11 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 export default function Skills() {
   const { skills, categories } = useLoaderData<typeof loader>();
   const actionData = useActionData<ActionData>();
+  const notice = useMemo<Notice | null>(() => {
+    if (actionData?.success) return { tone: "success", message: actionData.action === "add" ? "새 스킬이 성공적으로 추가되었습니다!" : "스킬이 성공적으로 삭제되었습니다!" };
+    if (actionData?.error) return { tone: "error", message: actionData.error };
+    return null;
+  }, [actionData]);
 
   // 숙련도 숫자를 문자열로 변환
   const getProficiencyLabel = (proficiency: number): string => {
@@ -128,21 +135,7 @@ export default function Skills() {
         </Link>
       </div>
 
-      {/* 성공/에러 메시지 */}
-      {actionData?.success && (
-        <div className="mb-6 p-4 bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 rounded-md transition-colors">
-          <p className="text-green-800 dark:text-green-300">
-            {actionData.action === "add"
-              ? "새 스킬이 성공적으로 추가되었습니다!"
-              : "스킬이 성공적으로 삭제되었습니다!"}
-          </p>
-        </div>
-      )}
-      {actionData?.error && (
-        <div className="mb-6 p-4 bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-md transition-colors">
-          <p className="text-red-800 dark:text-red-300">{actionData.error}</p>
-        </div>
-      )}
+      <Toast notice={notice} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* 기존 스킬 리스트 */}
