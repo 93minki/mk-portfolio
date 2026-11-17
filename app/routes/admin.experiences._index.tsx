@@ -1,3 +1,4 @@
+import ExperienceDescription from "~/components/experience/ExperienceDescription";
 import Toast, { type Notice } from "~/components/admin/Toast";
 import { db } from "~/lib/db.server";
 import { ActionFunctionArgs, LoaderFunctionArgs, Form, Link, useActionData, useLoaderData, useLocation, useNavigation } from "react-router";
@@ -26,7 +27,7 @@ function readExperienceForm(formData: FormData) {
   const start_date = formData.get("start_date")?.toString();
   if (!company_name || !position || !start_date) return { error: "회사명, 직책, 시작일은 필수입니다." };
   const is_current = formData.get("is_current") === "on";
-  return { values: [company_name, position, formData.get("description")?.toString() || null, start_date, is_current ? null : formData.get("end_date")?.toString() || null, is_current ? 1 : 0, formData.get("location")?.toString() || null] as const };
+  return { values: [company_name, position, formData.get("description")?.toString().replace(/\r\n?/g, "\n") || null, start_date, is_current ? null : formData.get("end_date")?.toString() || null, is_current ? 1 : 0, formData.get("location")?.toString() || null] as const };
 }
 
 export const action = async ({ request }: ActionFunctionArgs) => {
@@ -191,9 +192,7 @@ export default function Experiences() {
                         {experience.location}
                       </p>
                       {experience.description && (
-                        <p className="text-sm text-gray-700 dark:text-gray-300">
-                          {experience.description}
-                        </p>
+                        <ExperienceDescription text={experience.description} className="text-gray-700 dark:text-gray-300" />
                       )}
                     </div>
                     <div className="ml-4 flex items-center gap-2">
@@ -292,9 +291,9 @@ export default function Experiences() {
                 id="description"
                 name="description"
                 defaultValue={editing?.description ?? ""}
-                rows={editing ? 12 : 3}
+                rows={editing ? 20 : 6}
                 placeholder="주요 업무, 성과 등을 설명해주세요"
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                className="w-full field-sizing-content min-h-40 resize-y text-sm leading-relaxed px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               />
             </div>
 

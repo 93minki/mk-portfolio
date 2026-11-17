@@ -1,3 +1,4 @@
+import ExperienceDescription from "~/components/experience/ExperienceDescription";
 import { Experience } from "~/types/experience";
 
 interface ExperienceCardProps {
@@ -22,12 +23,6 @@ export default function ExperienceCard({ experience }: ExperienceCardProps) {
     }
     const endDate = formatDate(experience.end_date);
     return `${startDate} - ${endDate}`;
-  };
-
-  // 업무 설명을 배열로 변환 (줄바꿈 기준)
-  const getDescriptions = (): string[] => {
-    if (!experience.description) return [];
-    return experience.description.split("\n").filter((line) => line.trim());
   };
 
   return (
@@ -71,15 +66,7 @@ export default function ExperienceCard({ experience }: ExperienceCardProps) {
       </div>
 
       {experience.description && (
-        <div className="text-gray-600 dark:text-gray-300">
-          <ul className="space-y-1">
-            {getDescriptions().map((desc, index) => (
-              <li key={index} className="text-sm leading-relaxed">
-                {desc}
-              </li>
-            ))}
-          </ul>
-        </div>
+        <ExperienceDescription text={experience.description} className="text-gray-600 dark:text-gray-300" />
       )}
 
       {/* 현재 근무중 배지 - 오직 true일 때만 표시 */}
