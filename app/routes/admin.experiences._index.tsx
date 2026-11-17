@@ -1,15 +1,17 @@
 import Toast, { type Notice } from "~/components/admin/Toast";
 import { db } from "~/lib/db.server";
-import { ActionFunctionArgs , Form, Link, useActionData, useLoaderData, useNavigation } from "react-router";
+import { ActionFunctionArgs, LoaderFunctionArgs, Form, Link, useActionData, useLoaderData, useLocation, useNavigation } from "react-router";
 import { useEffect, useMemo, useRef } from "react";
 import { Experience } from "~/types/experience";
 
-export const loader = async () => {
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  const edit = new URL(request.url).searchParams.get("edit");
+  const editing = edit && /^\d+$/.test(edit) ? db.prepare("SELECT * FROM experiences WHERE id = ?").get(edit) as Experience | undefined : undefined;
   const experiences = db.prepare(
     "SELECT * FROM experiences ORDER BY is_current DESC, start_date DESC"
   ).all();
 
-  return { experiences: experiences as unknown as Experience[] };
+  return { experiences: experiences as unknown as Experience[], editing: editing ?? null };
 };
 
 type ActionData = {
@@ -17,6 +19,15 @@ type ActionData = {
   error?: string;
   action?: string;
 };
+
+function readExperienceForm(formData: FormData) {
+  const company_name = formData.get("company_name")?.toString();
+  const position = formData.get("position")?.toString();
+  const start_date = formData.get("start_date")?.toString();
+  if (!company_name || !position || !start_date) return { error: "회사명, 직책, 시작일은 필수입니다." };
+  const is_current = formData.get("is_current") === "on";
+  return { values: [company_name, position, formData.get("description")?.toString() || null, start_date, is_current ? null : formData.get("end_date")?.toString() || null, is_current ? 1 : 0, formData.get("location")?.toString() || null] as const };
+}
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
@@ -38,33 +49,19 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       return { success: true, action: "delete" };
     }
 
-    if (action === "add") {
-      const company_name = formData.get("company_name")?.toString();
-      const position = formData.get("position")?.toString();
-      const description = formData.get("description")?.toString();
-      const start_date = formData.get("start_date")?.toString();
-      const end_date = formData.get("end_date")?.toString();
-      const is_current = formData.get("is_current") === "on";
-      const location = formData.get("location")?.toString();
-
-      if (!company_name || !position || !start_date) {
-        return { error: "회사명, 직책, 시작일은 필수입니다." };
+    if (action === "add" || action === "update") {
+      const result = readExperienceForm(formData);
+      if (result.error) return { error: result.error };
+      const values = result.values!;
+      if (action === "update") {
+        const id = formData.get("experienceId")?.toString();
+        if (!id) return { error: "경력 ID가 필요합니다." };
+        const updated = db.prepare("UPDATE experiences SET company_name = ?, position = ?, description = ?, start_date = ?, end_date = ?, is_current = ?, location = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").run(...values, id);
+        if (!updated.changes) return { error: "경력을 찾을 수 없습니다." };
+      } else {
+        db.prepare("INSERT INTO experiences (company_name, position, description, start_date, end_date, is_current, location) VALUES (?, ?, ?, ?, ?, ?, ?)").run(...values);
       }
-
-      db.prepare(
-        "INSERT INTO experiences (company_name, position, description, start_date, end_date, is_current, location) VALUES (?, ?, ?, ?, ?, ?, ?)"
-      )
-        .run(
-          company_name,
-          position,
-          description || null,
-          start_date,
-          is_current ? null : end_date || null,
-          is_current ? 1 : 0,
-          location || null
-        );
-
-      return { success: true, action: "add" };
+      return { success: true, action };
     }
 
     return { error: "올바르지 않은 요청입니다." };
@@ -74,10 +71,12 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 export default function Experiences() {
-  const { experiences } = useLoaderData<typeof loader>();
+  const { experiences, editing: loadedEditing } = useLoaderData<typeof loader>();
   const actionData = useActionData<ActionData>();
+  const editing = actionData?.success && actionData.action === "update" ? null : loadedEditing;
+  const { pathname } = useLocation();
   const notice = useMemo<Notice | null>(() => {
-    if (actionData?.success) return { tone: "success", message: actionData.action === "add" ? "새 경력이 성공적으로 추가되었습니다!" : "경력이 성공적으로 삭제되었습니다!" };
+    if (actionData?.success) return { tone: "success", message: actionData.action === "update" ? "경력이 수정되었습니다." : actionData.action === "add" ? "새 경력이 성공적으로 추가되었습니다!" : "경력이 성공적으로 삭제되었습니다!" };
     if (actionData?.error) return { tone: "error", message: actionData.error };
     return null;
   }, [actionData]);
@@ -167,7 +166,7 @@ export default function Experiences() {
               {experiences.map((experience) => (
                 <div
                   key={experience.id}
-                  className="border border-gray-200 dark:border-gray-600 rounded-lg p-4 bg-gray-50 dark:bg-gray-700 transition-colors"
+                  className={`border rounded-lg p-4 bg-gray-50 dark:bg-gray-700 transition-colors ${editing?.id === experience.id ? "border-blue-500 dark:border-blue-500" : "border-gray-200 dark:border-gray-600"}`}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -197,35 +196,38 @@ export default function Experiences() {
                         </p>
                       )}
                     </div>
-                    <Form method="post" className="ml-4">
-                      <input type="hidden" name="_action" value="delete" />
-                      <input
-                        type="hidden"
-                        name="experienceId"
-                        value={experience.id}
-                      />
-                      <button
-                        type="submit"
-                        className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 p-1 transition-colors"
-                        onClick={(e) => {
-                          if (!confirm("정말로 삭제하시겠습니까?")) {
-                            e.preventDefault();
-                          }
-                        }}
-                      >
-                        <svg
-                          className="w-4 h-4"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
+                    <div className="ml-4 flex items-center gap-2">
+                      <Link to={`?edit=${experience.id}`} preventScrollReset aria-label={`${experience.company_name} 수정`} className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 p-1 text-sm">수정</Link>
+                      <Form method="post">
+                        <input type="hidden" name="_action" value="delete" />
+                        <input
+                          type="hidden"
+                          name="experienceId"
+                          value={experience.id}
+                        />
+                        <button
+                          type="submit"
+                          className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 p-1 transition-colors"
+                          onClick={(e) => {
+                            if (!confirm("정말로 삭제하시겠습니까?")) {
+                              e.preventDefault();
+                            }
+                          }}
                         >
-                          <path
-                            fillRule="evenodd"
-                            d="M8.75 1A2.75 2.75 0 006 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 10.23 1.482l.149-.022.841 10.518A2.75 2.75 0 007.596 19h4.807a2.75 2.75 0 002.742-2.53l.841-10.52.149.023a.75.75 0 00.23-1.482A41.03 41.03 0 0014 4.193V3.75A2.75 2.75 0 0011.25 1h-2.5zM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4zM8.58 7.72a.75.75 0 00-1.5.06l.3 7.5a.75.75 0 101.5-.06l-.3-7.5zm4.34.06a.75.75 0 10-1.5-.06l-.3 7.5a.75.75 0 101.5.06l.3-7.5z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      </button>
-                    </Form>
+                          <svg
+                            className="w-4 h-4"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M8.75 1A2.75 2.75 0 006 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 10.23 1.482l.149-.022.841 10.518A2.75 2.75 0 007.596 19h4.807a2.75 2.75 0 002.742-2.53l.841-10.52.149.023a.75.75 0 00.23-1.482A41.03 41.03 0 0014 4.193V3.75A2.75 2.75 0 0011.25 1h-2.5zM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4zM8.58 7.72a.75.75 0 00-1.5.06l.3 7.5a.75.75 0 101.5-.06l-.3-7.5zm4.34.06a.75.75 0 10-1.5-.06l-.3 7.5a.75.75 0 101.5.06l.3-7.5z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </button>
+                      </Form>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -236,11 +238,12 @@ export default function Experiences() {
         {/* 새 경력 추가 */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xs border border-gray-200 dark:border-gray-700 p-6 transition-colors">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-            새 경력 추가
+            {editing ? "경력 수정" : "새 경력 추가"}
           </h2>
 
-          <Form method="post" className="space-y-4" ref={formRef}>
-            <input type="hidden" name="_action" value="add" />
+          <Form key={editing?.id ?? "new"} method="post" className="space-y-4" ref={formRef}>
+            <input type="hidden" name="_action" value={editing ? "update" : "add"} />
+            {editing && <input type="hidden" name="experienceId" value={editing.id} />}
 
             <div>
               <label
@@ -253,6 +256,7 @@ export default function Experiences() {
                 type="text"
                 id="company_name"
                 name="company_name"
+                defaultValue={editing?.company_name ?? ""}
                 placeholder="예: 테크 스타트업"
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 required
@@ -270,6 +274,7 @@ export default function Experiences() {
                 type="text"
                 id="position"
                 name="position"
+                defaultValue={editing?.position ?? ""}
                 placeholder="예: Frontend Developer"
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 required
@@ -286,7 +291,8 @@ export default function Experiences() {
               <textarea
                 id="description"
                 name="description"
-                rows={3}
+                defaultValue={editing?.description ?? ""}
+                rows={editing ? 12 : 3}
                 placeholder="주요 업무, 성과 등을 설명해주세요"
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               />
@@ -304,6 +310,7 @@ export default function Experiences() {
                   type="month"
                   id="start_date"
                   name="start_date"
+                  defaultValue={editing?.start_date ?? ""}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                   required
                 />
@@ -319,6 +326,7 @@ export default function Experiences() {
                   type="month"
                   id="end_date"
                   name="end_date"
+                  defaultValue={editing?.end_date ?? ""}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 />
               </div>
@@ -335,6 +343,7 @@ export default function Experiences() {
                 type="text"
                 id="location"
                 name="location"
+                defaultValue={editing?.location ?? ""}
                 placeholder="예: Seoul, Korea"
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               />
@@ -344,6 +353,7 @@ export default function Experiences() {
               <input
                 id="is_current"
                 name="is_current"
+                defaultChecked={Boolean(editing?.is_current)}
                 type="checkbox"
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded-sm bg-white dark:bg-gray-700"
               />
@@ -359,8 +369,9 @@ export default function Experiences() {
               type="submit"
               className="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-xs text-sm font-medium rounded-md text-white bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800 transition-colors"
             >
-              경력 추가하기
+              {editing ? "수정 저장" : "경력 추가하기"}
             </button>
+            {editing && <Link to={pathname} preventScrollReset className="block text-center text-sm text-gray-600 dark:text-gray-400">취소</Link>}
           </Form>
         </div>
       </div>

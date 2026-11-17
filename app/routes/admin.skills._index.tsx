@@ -1,11 +1,13 @@
 import { useMemo } from "react";
 import Toast, { type Notice } from "~/components/admin/Toast";
 import { db } from "~/lib/db.server";
-import { ActionFunctionArgs , Form, Link, useActionData, useLoaderData } from "react-router";
+import { ActionFunctionArgs, LoaderFunctionArgs, Form, Link, useActionData, useLoaderData, useLocation } from "react-router";
 import { Skill } from "~/types/skill";
 import { SKILL_CATEGORIES } from "~/utils/categories";
 
-export const loader = async () => {
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  const edit = new URL(request.url).searchParams.get("edit");
+  const editing = edit && /^\d+$/.test(edit) ? db.prepare("SELECT * FROM skills WHERE id = ?").get(edit) as Skill | undefined : undefined;
   const skills = db.prepare(
     "SELECT * FROM skills ORDER BY category, proficiency DESC, name"
   ).all();
@@ -13,6 +15,7 @@ export const loader = async () => {
   return {
     skills: skills as unknown as Skill[],
     categories: SKILL_CATEGORIES,
+    editing: editing ?? null,
   };
 };
 
@@ -21,6 +24,17 @@ type ActionData = {
   error?: string;
   action?: string;
 };
+
+function readSkillForm(formData: FormData) {
+  const name = formData.get("name")?.toString();
+  const category = formData.get("category")?.toString();
+  const iconName = formData.get("icon_name")?.toString() || null;
+  const rawProficiency = formData.get("proficiency")?.toString();
+  const proficiency = Number(rawProficiency);
+  if (!name || !category) return { error: "스킬 이름과 카테고리는 필수입니다." };
+  if (!rawProficiency || !Number.isInteger(proficiency) || proficiency < 1 || proficiency > 4) return { error: "숙련도는 1부터 4까지의 정수여야 합니다." };
+  return { values: { name, category, iconName, proficiency } };
+}
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
@@ -40,43 +54,27 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       return { success: true, action: "delete" };
     }
 
-    if (action === "add") {
-      const name = formData.get("name")?.toString();
-      const category = formData.get("category")?.toString();
-      const iconName = formData.get("icon_name")?.toString();
-      const proficiency = parseInt(
-        formData.get("proficiency")?.toString() || "2"
-      );
-
-      if (!name || !category) {
-        return { error: "스킬 이름과 카테고리는 필수입니다." };
-      }
-
-      // 중복 체크
-      const existingSkill = db.prepare(
-        "SELECT id FROM skills WHERE name = ?"
-      )
-        .get(name);
-
-      if (existingSkill) {
-        return { error: "이미 존재하는 스킬입니다." };
-      }
-
+    if (action === "add" || action === "update") {
+      const result = readSkillForm(formData);
+      if (result.error) return { error: result.error };
+      const { name, category, proficiency, iconName } = result.values!;
+      const id = formData.get("skillId")?.toString();
+      if (action === "update" && !id) return { error: "스킬 ID가 필요합니다." };
+      const existingSkill = db.prepare("SELECT id FROM skills WHERE name = ? AND id != ?").get(name, id || 0);
+      if (existingSkill) return { error: "이미 존재하는 스킬입니다." };
       try {
-        db.prepare(
-          "INSERT INTO skills (name, category, proficiency, icon_name) VALUES (?, ?, ?, ?)"
-        )
-          .run(name, category, proficiency, iconName || null);
-
-        return { success: true, action: "add" };
+        if (action === "update") {
+          const updated = db.prepare("UPDATE skills SET name = ?, category = ?, proficiency = ?, icon_name = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?").run(name, category, proficiency, iconName, id);
+          if (!updated.changes) return { error: "스킬을 찾을 수 없습니다." };
+        } else {
+          db.prepare("INSERT INTO skills (name, category, proficiency, icon_name) VALUES (?, ?, ?, ?)").run(name, category, proficiency, iconName);
+        }
+        return { success: true, action };
       } catch (dbError) {
         console.error("DB Insert Error:", dbError);
         console.error("Values:", { name, category, proficiency, iconName });
-        const errorMessage =
-          dbError instanceof Error ? dbError.message : String(dbError);
-        return {
-          error: `데이터베이스 저장 중 오류가 발생했습니다: ${errorMessage}`,
-        };
+        const errorMessage = dbError instanceof Error ? dbError.message : String(dbError);
+        return { error: `데이터베이스 저장 중 오류가 발생했습니다: ${errorMessage}` };
       }
     }
 
@@ -87,10 +85,12 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 export default function Skills() {
-  const { skills, categories } = useLoaderData<typeof loader>();
+  const { skills, categories, editing: loadedEditing } = useLoaderData<typeof loader>();
   const actionData = useActionData<ActionData>();
+  const editing = actionData?.success && actionData.action === "update" ? null : loadedEditing;
+  const { pathname } = useLocation();
   const notice = useMemo<Notice | null>(() => {
-    if (actionData?.success) return { tone: "success", message: actionData.action === "add" ? "새 스킬이 성공적으로 추가되었습니다!" : "스킬이 성공적으로 삭제되었습니다!" };
+    if (actionData?.success) return { tone: "success", message: actionData.action === "update" ? "스킬이 수정되었습니다." : actionData.action === "add" ? "새 스킬이 성공적으로 추가되었습니다!" : "스킬이 성공적으로 삭제되었습니다!" };
     if (actionData?.error) return { tone: "error", message: actionData.error };
     return null;
   }, [actionData]);
@@ -183,7 +183,7 @@ export default function Skills() {
                       {categorySkills.map((skill) => (
                         <div
                           key={skill.id}
-                          className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 transition-colors"
+                          className={`flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border transition-colors ${editing?.id === skill.id ? "border-blue-500 dark:border-blue-500" : "border-gray-200 dark:border-gray-600"}`}
                         >
                           <div className="flex items-center space-x-3">
                             {skill.icon_name && (
@@ -215,39 +215,42 @@ export default function Skills() {
                               </div>
                             </div>
                           </div>
-                          <Form method="post" className="inline">
-                            <input
-                              type="hidden"
-                              name="_action"
-                              value="delete"
-                            />
-                            <input
-                              type="hidden"
-                              name="skillId"
-                              value={skill.id}
-                            />
-                            <button
-                              type="submit"
-                              className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 p-1 transition-colors"
-                              onClick={(e) => {
-                                if (!confirm("정말로 삭제하시겠습니까?")) {
-                                  e.preventDefault();
-                                }
-                              }}
-                            >
-                              <svg
-                                className="w-4 h-4"
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
+                          <div className="flex items-center gap-2">
+                            <Link to={`?edit=${skill.id}`} preventScrollReset aria-label={`${skill.name} 수정`} className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 p-1 text-sm">수정</Link>
+                            <Form method="post" className="inline">
+                              <input
+                                type="hidden"
+                                name="_action"
+                                value="delete"
+                              />
+                              <input
+                                type="hidden"
+                                name="skillId"
+                                value={skill.id}
+                              />
+                              <button
+                                type="submit"
+                                className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 p-1 transition-colors"
+                                onClick={(e) => {
+                                  if (!confirm("정말로 삭제하시겠습니까?")) {
+                                    e.preventDefault();
+                                  }
+                                }}
                               >
-                                <path
-                                  fillRule="evenodd"
-                                  d="M8.75 1A2.75 2.75 0 006 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 10.23 1.482l.149-.022.841 10.518A2.75 2.75 0 007.596 19h4.807a2.75 2.75 0 002.742-2.53l.841-10.52.149.023a.75.75 0 00.23-1.482A41.03 41.03 0 0014 4.193V3.75A2.75 2.75 0 0011.25 1h-2.5zM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4zM8.58 7.72a.75.75 0 00-1.5.06l.3 7.5a.75.75 0 101.5-.06l-.3-7.5zm4.34.06a.75.75 0 10-1.5-.06l-.3 7.5a.75.75 0 101.5.06l.3-7.5z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                            </button>
-                          </Form>
+                                <svg
+                                  className="w-4 h-4"
+                                  fill="currentColor"
+                                  viewBox="0 0 20 20"
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M8.75 1A2.75 2.75 0 006 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 10.23 1.482l.149-.022.841 10.518A2.75 2.75 0 007.596 19h4.807a2.75 2.75 0 002.742-2.53l.841-10.52.149.023a.75.75 0 00.23-1.482A41.03 41.03 0 0014 4.193V3.75A2.75 2.75 0 0011.25 1h-2.5zM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4zM8.58 7.72a.75.75 0 00-1.5.06l.3 7.5a.75.75 0 101.5-.06l-.3-7.5zm4.34.06a.75.75 0 10-1.5-.06l-.3 7.5a.75.75 0 101.5.06l.3-7.5z"
+                                    clipRule="evenodd"
+                                  />
+                                </svg>
+                              </button>
+                            </Form>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -261,11 +264,12 @@ export default function Skills() {
         {/* 새 스킬 추가 */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xs border border-gray-200 dark:border-gray-700 p-6 transition-colors">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-            새 스킬 추가
+            {editing ? "스킬 수정" : "새 스킬 추가"}
           </h2>
 
-          <Form method="post" className="space-y-4">
-            <input type="hidden" name="_action" value="add" />
+          <Form key={editing?.id ?? "new"} method="post" className="space-y-4">
+            <input type="hidden" name="_action" value={editing ? "update" : "add"} />
+            {editing && <input type="hidden" name="skillId" value={editing.id} />}
 
             <div>
               <label
@@ -278,6 +282,7 @@ export default function Skills() {
                 type="text"
                 id="name"
                 name="name"
+                defaultValue={editing?.name ?? ""}
                 placeholder="예: React, TypeScript, Next.js, Alpine.js"
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 required
@@ -294,6 +299,7 @@ export default function Skills() {
               <select
                 id="category"
                 name="category"
+                defaultValue={editing?.category ?? ""}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 required
               >
@@ -317,6 +323,7 @@ export default function Skills() {
                 type="text"
                 id="icon_name"
                 name="icon_name"
+                defaultValue={editing?.icon_name ?? ""}
                 placeholder="예: react, typescript, nextdotjs, alpinejs"
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               />
@@ -345,7 +352,7 @@ export default function Skills() {
                 id="proficiency"
                 name="proficiency"
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-xs bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                defaultValue="2"
+                defaultValue={editing?.proficiency ?? 2}
               >
                 <option value="1">초급 (Beginner)</option>
                 <option value="2">중급 (Intermediate)</option>
@@ -358,8 +365,9 @@ export default function Skills() {
               type="submit"
               className="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-xs text-sm font-medium rounded-md text-white bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800 transition-colors"
             >
-              스킬 추가하기
+              {editing ? "수정 저장" : "스킬 추가하기"}
             </button>
+            {editing && <Link to={pathname} preventScrollReset className="block text-center text-sm text-gray-600 dark:text-gray-400">취소</Link>}
           </Form>
         </div>
       </div>
