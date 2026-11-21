@@ -1,5 +1,5 @@
-import { env } from "~/lib/env.server";
 import { db } from "~/lib/db.server";
+import { getProfileImageVersion } from "~/lib/profile-image.server";
 import type { MetaFunction } from "react-router";
 import { useLoaderData } from "react-router";
 import ExperienceCard from "~/components/experience/ExperienceCard";
@@ -15,6 +15,7 @@ import { fetchVelogPosts } from "~/utils/rss";
 // 변환된 개인정보 타입
 type PersonalInfoData = {
   name?: string;
+  hero_title?: string;
   title?: string;
   bio?: string;
   email?: string;
@@ -61,11 +62,8 @@ export const loader = async () => {
     personalInfo[row.key as keyof PersonalInfoData] = row.value;
   }
 
-  // 환경변수 우선 적용
-  const ownerName =
-    env.OWNER_NAME || personalInfo.name || "Portfolio Owner";
-  const ownerPosition =
-    env.OWNER_POSITION || personalInfo.title || "Developer";
+  const ownerName = personalInfo.name || "Portfolio Owner";
+  const ownerPosition = personalInfo.title || "Developer";
 
   return {
     personalInfo,
@@ -75,11 +73,12 @@ export const loader = async () => {
     velogPosts,
     ownerName,
     ownerPosition,
+    profileImageVersion: getProfileImageVersion(),
   };
 };
 
 export default function Index() {
-  const { personalInfo, projects, experiences, skills, velogPosts, ownerName } =
+  const { personalInfo, projects, experiences, skills, velogPosts, ownerName, profileImageVersion } =
     useLoaderData<typeof loader>();
 
   // 카테고리별로 스킬 그룹핑
@@ -108,7 +107,9 @@ export default function Index() {
     (category) => skillsByCategory[category]
   );
 
-  const getName = () => ownerName || personalInfo.name || "Portfolio Owner";
+  const getName = () => ownerName;
+  const heroTitle = personalInfo.hero_title || `안녕하세요, ${ownerName}입니다`;
+  const nameIndex = heroTitle.indexOf(ownerName);
   const getBio = () =>
     personalInfo.bio || "사용자 경험을 중시하는 Frontend Developer입니다.";
 
@@ -125,22 +126,36 @@ export default function Index() {
       <div className="max-w-7xl mx-auto px-4 py-20 md:py-32">
         <div className="text-center">
           <div className="mb-8">
-            <div className="w-32 h-32 mx-auto mb-6 bg-linear-to-br from-blue-400 to-purple-500 dark:from-blue-500 dark:to-purple-600 rounded-full flex items-center justify-center shadow-lg">
-              <span className="text-4xl font-bold text-white">
-                {getName().charAt(0)}
-              </span>
-            </div>
+            {profileImageVersion ? (
+              <img
+                src={`/profile-image?v=${profileImageVersion}`}
+                alt={getName()}
+                className="w-32 h-32 mx-auto mb-6 rounded-full object-cover shadow-lg"
+              />
+            ) : (
+              <div className="w-32 h-32 mx-auto mb-6 bg-linear-to-br from-blue-400 to-purple-500 dark:from-blue-500 dark:to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                <span className="text-4xl font-bold text-white">
+                  {getName().charAt(0)}
+                </span>
+              </div>
+            )}
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-bold text-gray-900 dark:text-white mb-6">
-            안녕하세요,{" "}
-            <span className="bg-linear-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
-              {getName()}
-            </span>
-            입니다
+          <h1 className="text-5xl md:text-7xl font-bold text-gray-900 dark:text-white mb-6 whitespace-pre-wrap">
+            {nameIndex === -1 ? (
+              heroTitle
+            ) : (
+              <>
+                {heroTitle.slice(0, nameIndex)}
+                <span className="bg-linear-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
+                  {ownerName}
+                </span>
+                {heroTitle.slice(nameIndex + ownerName.length)}
+              </>
+            )}
           </h1>
 
-          <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed whitespace-pre-wrap">
             {getBio()}
           </p>
 

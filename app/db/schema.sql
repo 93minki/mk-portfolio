@@ -50,3 +50,11 @@ CREATE TABLE IF NOT EXISTS projects (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+-- 프로필 이미지 (1행만 존재, DB 파일 하나로 백업되도록 BLOB 저장)
+CREATE TABLE IF NOT EXISTS profile_image (
+  id INTEGER PRIMARY KEY CHECK (id = 1),
+  mime TEXT NOT NULL,
+  data BLOB NOT NULL,
+  version INTEGER NOT NULL
+);

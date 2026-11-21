@@ -1,4 +1,3 @@
-import { env } from "~/lib/env.server";
 import { db } from "~/lib/db.server";
 import type { LoaderFunctionArgs, MetaFunction } from "react-router";
 import { Link, useLoaderData } from "react-router";
@@ -18,9 +17,11 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
     throw new Response("프로젝트를 찾을 수 없습니다", { status: 404 });
   }
 
-  // 환경변수에서 소유자 정보 가져오기
-  const ownerName = env.OWNER_NAME || "Portfolio Owner";
-  const ownerPosition = env.OWNER_POSITION || "Developer";
+  const owner = Object.fromEntries(
+    (db.prepare("SELECT key, value FROM personal_info WHERE key IN ('name', 'title')").all() as { key: string; value: string }[]).map((row) => [row.key, row.value])
+  );
+  const ownerName = owner.name || "Portfolio Owner";
+  const ownerPosition = owner.title || "Developer";
 
   return {
     project: project as unknown as Project,
